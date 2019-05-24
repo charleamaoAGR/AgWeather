@@ -1,14 +1,7 @@
 import urllib2
 
 
-class WeatherStation:
 
-
-    data_size = 0
-
-    def __init__(self, station_id):
-        self.id = station_id
-        self.data = [["DateTime", "StnID", "Temp", "RH", "Rain", "AvgWS", "AvgWD"]]
 
 
 def download_data(url):
@@ -116,6 +109,10 @@ def tomcast_dsv_lookup(period_count, avg_temperature):
 
 
 def main():
-    print download_data('https://mbagweather.ca/partners/win/mawp15.txt')
+    data = download_data('https://mbagweather.ca/partners/win/mawp15.txt')
 
+    string = data.split('\n')
+
+    for each in string:
+        print each
 main()

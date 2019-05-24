@@ -117,7 +117,6 @@ def dict_summary(csv_file, stations):
     read_csv = csv.reader(csv_file, delimiter=',')
 
     # Loops through each line of the 'output.csv' file and extracts only the date we want.
-    # Fix bug where it writes down "Trace" if it appears in the output csv.
     for line in read_csv:
         max_temp = line[MAXTEMP]
         min_temp = line[MINTEMP]
@@ -127,17 +126,8 @@ def dict_summary(csv_file, stations):
         if check_station(station_id, get_EC_station_ids()):
             if (max_temp == "" or min_temp == "" or precip == "") and station_id != "" and station_id != "WPO":
                 print "Empty fields exist for station ID: %s. Please review Daily EC" % station_id
-
-            if max_temp.strip() == "Trace":
-                max_temp = ""
-                print "Max temp for %s was found to be 'Trace'. Check with Frodo and review Daily EC. " % station_id
-                print "Setting max temp as an empty field for %s." % station_id
-            if min_temp.strip() == "Trace":
-                min_temp = ""
-                print "Min temp for %s was found to be 'Trace'. Check with Frodo and review Daily EC. " % station_id
-                print "Setting min temp as an empty field for %s." % station_id
             if precip.strip() == "Trace":
-                precip = ""
+                precip = "0"
                 print "Precipitation for %s was found to be 'Trace'. Check with Frodo and review Daily EC. " % station_id
                 print "Setting precipitation as an empty field for %s." % station_id
 
