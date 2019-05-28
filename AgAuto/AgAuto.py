@@ -11,9 +11,10 @@ Date modified: Tue May 21 2019
 """
 
 from datetime import date, timedelta
-import xml_parser as parse
+from agweather_package import xml_parser as parse
+from agweather_package import get_path_dir
 import csv
-from UsefulClasses import get_path_dir
+
 
 
 urlroot = "http://dd.weather.gc.ca/observations/xml/MB/yesterday/"

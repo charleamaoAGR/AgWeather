@@ -249,14 +249,14 @@ def tomcast_dsv_lookup(period_count, avg_temperature):
 
 def get_path_dir(directory, file_name):
     cwd = os.getcwd()
-    file_base_dir = "%s/%s" % (cwd, directory)
-    file_path = "%s/%s" % (file_base_dir, file_name)
+    file_base_dir = os.path.join(cwd, directory)
+    file_path = os.path.join(file_base_dir, file_name)
 
     if not os.path.exists(file_base_dir):
         raise Exception('Directory %s does not exist within working directory.' % directory)
         file_path = ""
     if not os.path.exists(file_path):
-        raise  Exception('File %s does not exist within %s.' % (file_name, directory))
+        raise Exception('File %s does not exist within %s.' % (file_name, directory))
         file_path = ""
 
     return file_path

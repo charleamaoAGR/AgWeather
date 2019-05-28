@@ -1,5 +1,6 @@
 import urllib2
-from UsefulClasses import WeatherStation, get_path_dir
+from agweather_package import WeatherStation
+from agweather_package import get_path_dir
 from datetime import datetime
 import csv
 
@@ -7,7 +8,7 @@ import csv
 def download_data(url, local_data=False):
 
     if local_data:
-        with open('mawp_15_test.txt', 'r') as text_file:
+        with open(get_path_dir('raw_output_data', 'mawp_15_test.txt'), 'r') as text_file:
             data = text_file.read().split('\n')[1:-1]
     else:
         response = urllib2.urlopen(url)
@@ -37,9 +38,9 @@ def initialize_stations():
 
 
 def convert_douglas_csv():
-    with open('Potato_blight_comparison-Douglas.csv', 'r') as potato_csv:
+    with open(get_path_dir('input_data', 'Potato_blight_comparison-Douglas.csv'), 'r') as potato_csv:
         contents = list(csv.reader(potato_csv, delimiter=','))
-        output_file = open('mawp_15_test.txt', 'w+')
+        output_file = open(get_path_dir('raw_output_data', 'mawp_15_test.txt'), 'w+')
         for each_line in contents:
             output_file.write("%s\n" % ','.join(each_line))
         output_file.close()
@@ -51,7 +52,6 @@ def main():
 
     for each in stations.values():
         print "Station - %s | Risk - %s" % (each.get_id(), each.today_cumulative_dsv(datetime.strptime("2015-06-01", '%Y-%m-%d')))
-
 
 
 main()
