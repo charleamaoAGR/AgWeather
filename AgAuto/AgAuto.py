@@ -322,7 +322,7 @@ def getUpdatedDailyData(urlroot, strdate_dash, daily_contents, updated_daily_con
     stations = get_EC_stations()
 
     # Grab the new station data from the newly created output.csv file.
-    summary_csv = open(default_output, 'r')
+    summary_csv = open(get_path_dir('raw_output_data', default_output), 'r')
     summary_dict = dict_summary(summary_csv, stations)
     summary_csv.close()
 

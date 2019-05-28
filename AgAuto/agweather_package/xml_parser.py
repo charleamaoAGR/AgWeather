@@ -486,7 +486,7 @@ def csv_out(results_list, ordered_titles, filename):
         ordered_titles_list = finalize_titles(ordered_titles)
         
         # Write the header and data to the csv file
-        with open(filename, "wb") as f:
+        with open(get_path_dir('raw_output_data', filename), "wb") as f:
             writer = csv.writer(f)
             writer.writerow(ordered_titles_list)
             writer.writerows(ordered_results_list)

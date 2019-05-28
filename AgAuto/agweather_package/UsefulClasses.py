@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 
+
 class Packet(object):
 
     def __init__(self, name):
@@ -125,7 +126,7 @@ class WeatherStation(Packet):
     def today_cumulative_dsv(self, seed_date):  # Create function to get just today's DSV as well.
         cumul_dsv = 0
         index = 0
-        output_txt = open('comparison.txt', 'w+')
+        output_txt = open(get_path_dir('raw_output_data', 'comparison.txt'), 'w+')
         for each_day in self.data:
             if each_day.get_date().date() == seed_date.date():
                 break
@@ -247,16 +248,15 @@ def tomcast_dsv_lookup(period_count, avg_temperature):
     return dsv
 
 
-def get_path_dir(directory, file_name):
+def get_path_dir(directory, file_name, create=True):
     cwd = os.getcwd()
     file_base_dir = os.path.join(cwd, directory)
     file_path = os.path.join(file_base_dir, file_name)
 
     if not os.path.exists(file_base_dir):
         raise Exception('Directory %s does not exist within working directory.' % directory)
-        file_path = ""
-    if not os.path.exists(file_path):
-        raise Exception('File %s does not exist within %s.' % (file_name, directory))
-        file_path = ""
+    if not create:
+        if not os.path.exists(file_path):
+            raise Exception('File %s does not exist within %s.' % (file_name, directory))
 
     return file_path
