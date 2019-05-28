@@ -1,17 +1,23 @@
 import urllib2
-from UsefulClasses import WeatherStation
+from UsefulClasses import WeatherStation, get_path_dir
 from datetime import datetime
+import csv
 
-def download_data(url):
 
-    response = urllib2.urlopen(url)
-    data = response.read().split('\n')[1:-1]
+def download_data(url, local_data=False):
+
+    if local_data:
+        with open('mawp_15_test.txt', 'r') as text_file:
+            data = text_file.read().split('\n')[1:-1]
+    else:
+        response = urllib2.urlopen(url)
+        data = response.read().split('\n')[1:-1]
 
     return data
 
 
 def initialize_stations():
-    data = download_data('https://mbagweather.ca/partners/win/mawp15.txt')
+    data = download_data('https://mbagweather.ca/partners/win/mawp15.txt', True)
     stations_dict = {}
     station_ids = set()
 
@@ -30,11 +36,22 @@ def initialize_stations():
     return stations_dict
 
 
+def convert_douglas_csv():
+    with open('Potato_blight_comparison-Douglas.csv', 'r') as potato_csv:
+        contents = list(csv.reader(potato_csv, delimiter=','))
+        output_file = open('mawp_15_test.txt', 'w+')
+        for each_line in contents:
+            output_file.write("%s\n" % ','.join(each_line))
+        output_file.close()
+
+
 def main():
 
     stations = initialize_stations()
 
     for each in stations.values():
-        print "Station - %s | Risk - %s" % (each.get_id(), each.today_cumulative_dsv(datetime.strptime("2019-05-01", '%Y-%m-%d')))
+        print "Station - %s | Risk - %s" % (each.get_id(), each.today_cumulative_dsv(datetime.strptime("2015-06-01", '%Y-%m-%d')))
+
+
 
 main()

@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import os
 
 class Packet(object):
 
@@ -54,7 +54,13 @@ class DailyData:
             if each_entry[1] >= 7 and each_entry[2] >= 86:
                 matching_periods += 1
                 temp_sum += each_entry[1]
-        return [matching_periods, temp_sum/96.0]
+
+        if matching_periods == 0:
+            temp_sum = 0
+        else:
+            temp_sum = temp_sum / matching_periods
+
+        return [matching_periods, temp_sum]
 
     def tomcast_params(self):
         matching_periods = 0
@@ -63,7 +69,12 @@ class DailyData:
             if each_entry[2] >= 86 and (9 <= each_entry[1] < 27):
                 matching_periods += 1
                 temp_sum += each_entry[1]
-        return [matching_periods, temp_sum/96.0]
+
+        if matching_periods == 0:
+            temp_sum = 0
+        else:
+            temp_sum = temp_sum / matching_periods
+        return [matching_periods, temp_sum]
 
 
 class WeatherStation(Packet):
@@ -100,7 +111,7 @@ class WeatherStation(Packet):
                     if self.data[-1].get_date().date() == date_info.date():
                         self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)
                     else:
-                        self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)
+                        self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)  # Add 00:00 data
                         self.add_date(date_info)
 
             except ValueError:
@@ -111,18 +122,25 @@ class WeatherStation(Packet):
         self.data.append(new_day)
         self.data_size += 1
 
-    def today_cumulative_dsv(self, date_var):  # THIS IS WRONG!!!!!!
+    def today_cumulative_dsv(self, seed_date):  # Create function to get just today's DSV as well.
         cumul_dsv = 0
         index = 0
+        output_txt = open('comparison.txt', 'w+')
         for each_day in self.data:
-            if each_day.get_date().date() == date_var.date():
+            if each_day.get_date().date() == seed_date.date():
                 break
             index += 1
 
-        for each_day in self.data[index:-2]:
-            cumul_dsv += each_day.get_daily_dsv(cumul_dsv)
+        for each_day in self.data[index:-1]:  # Index -2 because last item is always an incomplete day.
+            daily_dsv = each_day.get_daily_dsv(cumul_dsv)
+            cumul_dsv += daily_dsv
+            output_txt.write("Station: %s | Date: %s | Daily DSV: %s | Cumulative DSV: %s\n" % (self.id, datetime.strftime(each_day.get_date(), "%Y-%m-%d"), daily_dsv, cumul_dsv))
+        output_txt.close()
 
         return cumul_dsv  # Maybe return DSV straight from table and not just cumulative?
+
+    def today_dsv(self, seed_date):
+        return self.data[-2].get_daily_dsv(self.today_cumulative_dsv(seed_date))
 
     def show_data(self):
         for each_day in self.data:
@@ -135,7 +153,7 @@ def date_to_hours(date_var):
 
 def wisdom_dsv_lookup(period_count, avg_temperature):
 
-    dsv = -1
+    dsv = 0
     if 0 <= period_count < 39:
         dsv = 0
     elif (39 <= period_count <= 50) and (avg_temperature < 15.5):
@@ -170,8 +188,8 @@ def wisdom_dsv_lookup(period_count, avg_temperature):
 
 def tomcast_dsv_lookup(period_count, avg_temperature):
 
-    dsv = -1
-    if 0 <= count <= 10:
+    dsv = 0
+    if 0 <= period_count <= 10:
         dsv = 0
     elif (11 <= period_count <= 14) and (avg_temperature < 20.5):
         dsv = 0
@@ -227,3 +245,18 @@ def tomcast_dsv_lookup(period_count, avg_temperature):
         dsv = 4
 
     return dsv
+
+
+def get_path_dir(directory, file_name):
+    cwd = os.getcwd()
+    file_base_dir = "%s/%s" % (cwd, directory)
+    file_path = "%s/%s" % (file_base_dir, file_name)
+
+    if not os.path.exists(file_base_dir):
+        raise Exception('Directory %s does not exist within working directory.' % directory)
+        file_path = ""
+    if not os.path.exists(file_path):
+        raise  Exception('File %s does not exist within %s.' % (file_name, directory))
+        file_path = ""
+
+    return file_path

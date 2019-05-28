@@ -7,6 +7,7 @@ import copy
 import sys
 import csv
 import os
+from UsefulClasses import get_path_dir
 
 """
 These functions are used to collect SWOB-ML data from the Environment Canada
@@ -80,7 +81,7 @@ def clean_incoming(clean_info_filename="in.txt", default_order=500):
     """
     try:
         clean_info = {}
-        clean_info_file_obj = file(clean_info_filename,'rb')
+        clean_info_file_obj = file(get_path_dir("config_files", clean_info_filename), 'rb')
         split = csv.reader(clean_info_file_obj, delimiter=',', skipinitialspace=True)
         for line_data_list in split:
             if line_data_list.__len__()<=3:
@@ -163,6 +164,7 @@ def parse_xml_links(link_base_url_root, xml_links, title_dict={}, clean_dict={},
 
     return total_xml_data, title_list_sorted
 
+
 def parse_mbag_xml(link_base_url_root, strdate,title_dict={}, clean_dict={}, clean=False, default_order=500):
     total_xml_data = []
     xml_address = "yesterday_mb_%s_e.xml" %(strdate) 
@@ -192,8 +194,8 @@ def parse_mbag_xml(link_base_url_root, strdate,title_dict={}, clean_dict={}, cle
                         uom   = unicode(each_element.attrib.get('uom')).encode('ascii','ignore')
                         order = int(default_order)
                         qual  = "qa_none"
-               #print '%s = %s' %(name,value)
-                        if clean == True:
+
+                        if clean:
                             try:
                                 order = int(clean_dict[name][1])
                             # Modify name last (lookups depend on it)
@@ -209,6 +211,7 @@ def parse_mbag_xml(link_base_url_root, strdate,title_dict={}, clean_dict={}, cle
             title_list_sorted = sorted(title_dict.iteritems(),key=itemgetter(1), reverse=False)    
     
     return total_xml_data, title_list_sorted
+
 
 def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict={}, clean=False, default_order=500, default_config="mbag"):
     """
@@ -230,7 +233,7 @@ def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict
     if station.__len__() == 3:
         station = "C" + station
         
-    if station=="default":
+    if station == "default":
         one_station_url = "http://dd.weather.gc.ca/observations/xml/MB/yesterday/"
     else:
         one_station_url = urlroot + strdate + "/" + station + "/"
@@ -249,9 +252,8 @@ def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict
     else:
         one_station_data_list, ordered_titles = parse_xml_links(one_station_url, one_station_xml_links, title_dict=title_dict, clean_dict=clean_dict, clean=clean)
 
-
-    
     return one_station_data_list, ordered_titles
+
 
 def order_row(row, ordered_titles):
     """
@@ -267,6 +269,7 @@ def order_row(row, ordered_titles):
         ordered_row.append(str(row.get(name[0],[""])[0]))
     
     return ordered_row
+
 
 def order_results(results_list, ordered_titles):
     """
@@ -285,6 +288,7 @@ def order_results(results_list, ordered_titles):
     
     return results
 
+
 def finalize_titles(ordered_titles):
     """
     Clean title information for ["Title (unit)",...] format
@@ -298,6 +302,7 @@ def finalize_titles(ordered_titles):
         titles.append(str(title[0]) + " (" + str(title[1][1]) + ")")
     
     return titles
+
 
 def get_fonts():
     """
@@ -363,6 +368,7 @@ def get_fonts():
     fonts['100'] = 'stylef'
     
     return fonts
+
 
 def excel_out(data_list, titles_list, desired_filename, multi = False):
     """
@@ -459,6 +465,7 @@ def excel_out(data_list, titles_list, desired_filename, multi = False):
         return True
     except:
         return False
+
 
 def csv_out(results_list, ordered_titles, filename):
     """

@@ -13,6 +13,7 @@ Date modified: Tue May 21 2019
 from datetime import date, timedelta
 import xml_parser as parse
 import csv
+from UsefulClasses import get_path_dir
 
 
 urlroot = "http://dd.weather.gc.ca/observations/xml/MB/yesterday/"
@@ -182,7 +183,7 @@ wish to add or remove stations, refer to this text file.
 def get_EC_stations():
     
     stations_list = []
-    with open('stations.txt', 'r') as stations:
+    with open(get_path_dir('config_files', 'stations.txt'), 'r') as stations:
         for each_line in stations:
             stations_list.append(each_line)
             
@@ -192,7 +193,7 @@ def get_EC_stations():
 def get_EC_station_ids():
 
     station_ids = []
-    with open('stations.txt', 'r') as stations:
+    with open(get_path_dir('config_files', 'stations.txt'), 'r') as stations:
         for each_line in stations:
             station_id = each_line.split(':')[0]
             station_ids.append(station_id)
