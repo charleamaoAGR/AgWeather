@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 
@@ -25,6 +25,8 @@ class DailyData:
         self.date_var = date_var
         self.data = []
         self.period_size = 0
+        self.avg_temp = 0.0
+        self.period_count = 0
 
     def add_data(self, time_stamp, temp, RH, rain, avg_ws, avg_wd):
         self.data.append([date_to_hours(time_stamp), temp, RH, rain, avg_ws, avg_wd])
@@ -39,12 +41,16 @@ class DailyData:
     def get_daily_dsv(self, cumul_dsv):
         dsv = 0
 
-        if self.period_size == 96:
+        if self.period_size == 96:  # Since we only look at 23.75 hour period there are only 95, 15 minute, time chunks?
             if cumul_dsv < 18:
                 params = self.wisdom_params()
+                self.period_count = params[0]
+                self.avg_temp = params[1]
                 dsv = wisdom_dsv_lookup(params[0], params[1])
             else:
                 params = self.tomcast_params()
+                self.period_count = params[0]
+                self.avg_temp = params[1]
                 dsv = tomcast_dsv_lookup(params[0], params[1])
         return dsv
 
@@ -54,14 +60,9 @@ class DailyData:
         for each_entry in self.data:
             if each_entry[1] >= 7 and each_entry[2] >= 86:
                 matching_periods += 1
-                temp_sum += each_entry[1]
+            temp_sum += each_entry[1]
 
-        if matching_periods == 0:
-            temp_sum = 0
-        else:
-            temp_sum = temp_sum / matching_periods
-
-        return [matching_periods, temp_sum]
+        return [matching_periods, temp_sum / 96.0]
 
     def tomcast_params(self):
         matching_periods = 0
@@ -69,13 +70,9 @@ class DailyData:
         for each_entry in self.data:
             if each_entry[2] >= 86 and (9 <= each_entry[1] < 27):
                 matching_periods += 1
-                temp_sum += each_entry[1]
+            temp_sum += each_entry[1]
 
-        if matching_periods == 0:
-            temp_sum = 0
-        else:
-            temp_sum = temp_sum / matching_periods
-        return [matching_periods, temp_sum]
+        return [matching_periods, temp_sum / 96.0]
 
 
 class WeatherStation(Packet):
@@ -94,7 +91,7 @@ class WeatherStation(Packet):
             try:
                 date_info = datetime.strptime(items[0], '%Y-%m-%d %H:%M')
 
-                if self.invalid_data_flag == False:
+                if not self.invalid_data_flag:
                     if '-7999' in items:
                         self.invalid_data_flag = True
                         print "Station %s flagged for invalid data." % self.id
@@ -105,15 +102,15 @@ class WeatherStation(Packet):
                 avg_ws = float(items[5])
                 avg_wd = float(items[6])
 
-                if self.data_size == 0:
-                    self.add_date(date_info)
+                if self.data_size == 0 and date_to_hours(date_info) == 12.25:  # Check if 12:15 PM
+                    self.add_date(date_info + timedelta(days=1))  # Creates and adds new DailyData object.
                     self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)
                 elif self.data_size > 0:
-                    if self.data[-1].get_date().date() == date_info.date():
+                    if ((date_info + timedelta(days=1)) - self.data[-1].get_date()).days < 1:
                         self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)
                     else:
-                        self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)  # Add 00:00 data
-                        self.add_date(date_info)
+                        self.add_date(date_info + timedelta(days=1))
+                        self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)  # Add 12:15 PM data
 
             except ValueError:
                 print "Station data is invalid for %s. Skipping data entry for this time period." % self.id
@@ -135,7 +132,9 @@ class WeatherStation(Packet):
         for each_day in self.data[index:-1]:  # Index -2 because last item is always an incomplete day.
             daily_dsv = each_day.get_daily_dsv(cumul_dsv)
             cumul_dsv += daily_dsv
-            output_txt.write("Station: %s | Date: %s | Daily DSV: %s | Cumulative DSV: %s\n" % (self.id, datetime.strftime(each_day.get_date(), "%Y-%m-%d"), daily_dsv, cumul_dsv))
+            output_txt.write("Station: %s | Date: %s | Daily DSV: %s | Cumulative DSV: %s | Count: %s | Avg. Temp: %.2f\n"
+                             % (self.id, datetime.strftime(each_day.get_date(), "%Y-%m-%d"), daily_dsv, cumul_dsv,
+                                each_day.period_count, each_day.avg_temp))
         output_txt.close()
 
         return cumul_dsv  # Maybe return DSV straight from table and not just cumulative?

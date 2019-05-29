@@ -51,7 +51,7 @@ def main():
     stations = initialize_stations()
 
     for each in stations.values():
-        print "Station - %s | Risk - %s" % (each.get_id(), each.today_cumulative_dsv(datetime.strptime("2015-06-01", '%Y-%m-%d')))
+        print "Station - %s | Risk - %s" % (each.get_id(), each.today_cumulative_dsv(datetime.strptime("2015-06-02", '%Y-%m-%d')))
 
 
 main()
