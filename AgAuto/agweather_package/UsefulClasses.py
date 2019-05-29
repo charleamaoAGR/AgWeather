@@ -60,9 +60,14 @@ class DailyData:
         for each_entry in self.data:
             if each_entry[1] >= 7 and each_entry[2] >= 86:
                 matching_periods += 1
-            temp_sum += each_entry[1]
+                temp_sum += each_entry[1]
 
-        return [matching_periods, temp_sum / 96.0]
+        if matching_periods == 0:
+            temp_sum = 0
+        else:
+            temp_sum = temp_sum / matching_periods
+
+        return [matching_periods, temp_sum]
 
     def tomcast_params(self):
         matching_periods = 0
@@ -70,9 +75,13 @@ class DailyData:
         for each_entry in self.data:
             if each_entry[2] >= 86 and (9 <= each_entry[1] < 27):
                 matching_periods += 1
-            temp_sum += each_entry[1]
+                temp_sum += each_entry[1]
 
-        return [matching_periods, temp_sum / 96.0]
+        if matching_periods == 0:
+            temp_sum = 0
+        else:
+            temp_sum = temp_sum / matching_periods
+        return [matching_periods, temp_sum]
 
 
 class WeatherStation(Packet):
@@ -83,6 +92,7 @@ class WeatherStation(Packet):
         self.invalid_data_flag = False
         self.days = []
         self.data_size = 0
+        self.output_txt = ""
 
     def add_data(self, items):
 
@@ -122,22 +132,16 @@ class WeatherStation(Packet):
 
     def today_cumulative_dsv(self, seed_date):  # Create function to get just today's DSV as well.
         cumul_dsv = 0
-        index = 0
-        output_txt = open(get_path_dir('raw_output_data', 'comparison.txt'), 'w+')
-        for each_day in self.data:
-            if each_day.get_date().date() == seed_date.date():
-                break
-            index += 1
+        index = self.get_date_index(seed_date)
 
         for each_day in self.data[index:-1]:  # Index -2 because last item is always an incomplete day.
             daily_dsv = each_day.get_daily_dsv(cumul_dsv)
             cumul_dsv += daily_dsv
-            output_txt.write("Station: %s | Date: %s | Daily DSV: %s | Cumulative DSV: %s | Count: %s | Avg. Temp: %.2f\n"
-                             % (self.id, datetime.strftime(each_day.get_date(), "%Y-%m-%d"), daily_dsv, cumul_dsv,
-                                each_day.period_count, each_day.avg_temp))
-        output_txt.close()
+            self.output_txt = self.output_txt + ("Station: %s | Date: %s | Daily DSV: %s | Cumulative DSV: %s | Count: %s | Avg. Temp: %.2f\n"
+                                                 % (self.id, datetime.strftime(each_day.get_date(), "%Y-%m-%d"), daily_dsv,
+                                                       cumul_dsv, each_day.period_count, each_day.avg_temp))
 
-        return cumul_dsv  # Maybe return DSV straight from table and not just cumulative?
+        return cumul_dsv, self.output_txt  # Maybe return DSV straight from table and not just cumulative?
 
     def today_dsv(self, seed_date):
         return self.data[-2].get_daily_dsv(self.today_cumulative_dsv(seed_date))
@@ -146,12 +150,25 @@ class WeatherStation(Packet):
         for each_day in self.data:
             print each_day.get_daily_dsv(0)
 
+    def get_date_index(self, seed_date):
+        index = 0
+        for each_day in self.data:
+            if each_day.get_date().date() == seed_date.date():
+                break
+            index += 1
+        return index
+
 
 def date_to_hours(date_var):
     return date_var.hour + date_var.minute/60.0
 
 
-def wisdom_dsv_lookup(period_count, avg_temperature):
+def wisdom_dsv_lookup(period_count, avg_temperature_raw):
+
+    if avg_temperature_raw > 7.0:
+        avg_temperature = round(avg_temperature_raw)
+    else:
+        avg_temperature = avg_temperature_raw
 
     dsv = 0
     if 0 <= period_count < 39:
@@ -186,7 +203,12 @@ def wisdom_dsv_lookup(period_count, avg_temperature):
     return dsv
 
 
-def tomcast_dsv_lookup(period_count, avg_temperature):
+def tomcast_dsv_lookup(period_count, avg_temperature_raw):
+
+    if avg_temperature_raw > 9.0:
+        avg_temperature = round(avg_temperature_raw)
+    else:
+        avg_temperature = avg_temperature_raw
 
     dsv = 0
     if 0 <= period_count <= 10:

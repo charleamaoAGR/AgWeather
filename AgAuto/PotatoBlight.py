@@ -18,7 +18,7 @@ def download_data(url, local_data=False):
 
 
 def initialize_stations():
-    data = download_data('https://mbagweather.ca/partners/win/mawp15.txt', True)
+    data = download_data('https://mbagweather.ca/partners/win/mawp15.txt')
     stations_dict = {}
     station_ids = set()
 
@@ -49,9 +49,15 @@ def convert_douglas_csv():
 def main():
 
     stations = initialize_stations()
-
+    comparison_file = open(get_path_dir('raw_output_data', 'comparison.txt'), 'w+')
+    output_txt = ""
     for each in stations.values():
-        print "Station - %s | Risk - %s" % (each.get_id(), each.today_cumulative_dsv(datetime.strptime("2015-06-02", '%Y-%m-%d')))
+        cumul_dsv, new_txt = each.today_cumulative_dsv(datetime.strptime("2019-05-02", '%Y-%m-%d'))
+        output_txt += new_txt
+        print "Station - %s | Risk - %s" % (each.get_id(), cumul_dsv)
+    comparison_file.write(output_txt)
+    comparison_file.close()
 
 
 main()
+
