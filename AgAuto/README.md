@@ -1,44 +1,37 @@
-# Parser for SWOB-ML files from Environment Canada's MSC
+# Automation Scripts for AgWeather
 
-Parses SWOB-ML information from http://dd.weather.gc.ca/observations/swob-ml/
+Contains scripts written in Python to automate repetitive and error-prone tasks within AgWeather.
 
-See source code in ```parser.py```.
 
 ## Installation Instructions
 
- * On Ubuntu 14.04
+ * On Windows 10
   * Download or clone the repository:
     * Use the 'Download ZIP' button on the right OR
-    * ```git clone https://github.com/devopy/SwobTheDeck.git``` or ```git clone git@github.com:devopy/SwobTheDeck.git```
+    * ```git clone https://github.com/charleamaoAGR/AgWeather``` or ```git clone git@https://github.com/charleamaoAGR/AgWeather```
     
-  * Install pip and virtualenv:
+  * Install latest Anaconda for Python.
+  * Create a virtual environment for Python 2.7 using Anaconda Prompt.
     ```
-    sudo apt-get install python-pip python-dev build-essential
-    sudo pip install --upgrade pip
-    sudo pip install --upgrade virtualenv
+    conda create -n py27 python=2.7 anaconda
     ```
-  * Create a virtualenv
+  * Activate py27
     ```
-    virtualenv envcan
+    conda activate py27
     ```
-  * Activate virtualenv
-    ```
-    source envcan/bin/activate
-    ```
-  * Install packages
+  * Navigate using cd commands until you're inside the AgAuto directory. Install the necessary packages listed in REQUIREMENTS.txt.
     ```
     pip install -r REQUIREMENTS.txt
     ```
-  * Read the code.  See the examples at the bottom of ```parser.py```.
-  * Run the code:
+  * You can use your favorite Python editor to run the code or you can use the terminal:
     ```
-    python parser.py
+    python AgAuto.py
     ```
   * Later you can deactivate the virtualenv
     ```
-    deactivate
+    conda deactivate
     ```
-  * The necessary packages are installed in the virtualenv, so the envcan virtualenv must be active so that the code works.
+  * The necessary packages are installed in the virtual environment, so the py27 virtual environment must be active so that the code works.
 
 ## Changes
 
@@ -46,6 +39,3 @@ More changes are coming soon, including more comprehensive documentation and sup
 
 **Coming soon:**
  * Python 3 Support
- * Generate HTML tables
- * Support for cache
- * Improved multi station support
