@@ -16,7 +16,6 @@ from agweather_package import get_path_dir
 import csv
 
 
-
 urlroot = "http://dd.weather.gc.ca/observations/xml/MB/yesterday/"
 MAXTEMP = 2
 MINTEMP = 3
@@ -114,7 +113,7 @@ Parameters:
 """
 
 
-def dict_summary(csv_file, stations):
+def dict_summary(csv_file):
     summary_dict = {}
     read_csv = csv.reader(csv_file, delimiter=',')
 
@@ -323,7 +322,7 @@ def getUpdatedDailyData(urlroot, strdate_dash, daily_contents, updated_daily_con
 
     # Grab the new station data from the newly created output.csv file.
     summary_csv = open(get_path_dir('raw_output_data', default_output), 'r')
-    summary_dict = dict_summary(summary_csv, stations)
+    summary_dict = dict_summary(summary_csv)
     summary_csv.close()
 
     # If daily_contents has no data (i.e. there is no DailyEC.csv in the working directory)
