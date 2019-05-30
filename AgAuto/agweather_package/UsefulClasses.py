@@ -1,5 +1,25 @@
 from datetime import datetime, timedelta
+from UsefulFunctions import get_path_dir
+from UsefulFunctions import date_to_hours
+from UsefulFunctions import wisdom_dsv_lookup
+from UsefulFunctions import tomcast_dsv_lookup
 import os
+
+# CONSTANTS
+MAXIMUM_PERIOD_SIZE = 96
+MIN_ALLOWABLE_PERIOD_SIZE = 86
+RH_CUTOFF = 86
+WISDOM_DSV_CUTOFF = 18
+WISDOM_LOW_TEMP_CUTOFF = 7
+TOMCAST_LOW_TEMP_CUTOFF = 9
+TOMCAST_HIGH_TEMP_CUTOFF = 27
+DATE_INDEX = 0
+ID_INDEX = 1
+TEMP_INDEX = 2
+RH_INDEX = 3
+RAIN_INDEX = 4
+AVG_WS_INDEX = 5
+AVG_WD_INDEX = 6
 
 
 class Packet(object):
@@ -41,8 +61,8 @@ class DailyData:
     def get_daily_dsv(self, cumul_dsv):
         dsv = 0
 
-        if self.period_size > 86:  # If missing 10 periods then ignore.
-            if cumul_dsv < 18:
+        if self.period_size > MIN_ALLOWABLE_PERIOD_SIZE:  # If missing 10 periods then ignore.
+            if cumul_dsv < WISDOM_DSV_CUTOFF:
                 params = self.wisdom_params()
                 self.period_count = params[0]
                 self.avg_temp = params[1]
@@ -58,7 +78,7 @@ class DailyData:
         matching_periods = 0
         temp_sum = 0.0
         for each_entry in self.data:
-            if each_entry[1] >= 7 and each_entry[2] >= 86:
+            if each_entry[1] >= WISDOM_LOW_TEMP_CUTOFF and each_entry[2] >= RH_CUTOFF:
                 matching_periods += 1
                 temp_sum += each_entry[1]
 
@@ -73,7 +93,7 @@ class DailyData:
         matching_periods = 0
         temp_sum = 0.0
         for each_entry in self.data:
-            if each_entry[2] >= 86 and (9 <= each_entry[1] < 27):
+            if each_entry[2] >= RH_CUTOFF and (TOMCAST_LOW_TEMP_CUTOFF <= each_entry[1] < TOMCAST_HIGH_TEMP_CUTOFF):
                 matching_periods += 1
                 temp_sum += each_entry[1]
 
@@ -99,13 +119,13 @@ class WeatherStation(Packet):
         if len(items) > 1:
 
             try:
-                date_info = datetime.strptime(items[0], '%Y-%m-%d %H:%M')
+                date_info = datetime.strptime(items[DATE_INDEX], '%Y-%m-%d %H:%M')
 
-                temp = float(items[2])
-                RH = int(items[3])
-                rain = float(items[4])
-                avg_ws = float(items[5])
-                avg_wd = float(items[6])
+                temp = float(items[TEMP_INDEX])
+                RH = int(items[RH_INDEX])
+                rain = float(items[RAIN_INDEX])
+                avg_ws = float(items[AVG_WS_INDEX])
+                avg_wd = float(items[AVG_WD_INDEX])
 
                 if self.data_size == 0 and date_to_hours(date_info) == 12.25:  # Check if 12:15 PM
                     self.add_date(date_info + timedelta(days=1))  # Creates and adds new DailyData object.
@@ -114,7 +134,7 @@ class WeatherStation(Packet):
                     if self.check_valid_range(self.data[-1].get_earliest_date(), date_info):
                         self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)
                     else:
-                        if self.data[-1].period_size <= 86 and not self.invalid_data_flag:
+                        if self.data[-1].period_size <= MIN_ALLOWABLE_PERIOD_SIZE and not self.invalid_data_flag:
                             self.invalid_data_flag = True
                         self.add_date(date_info + timedelta(days=1))
                         self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)  # Add 12:15 PM data
@@ -130,7 +150,7 @@ class WeatherStation(Packet):
     def today_dsv_package(self, seed_date):  # Create function to get just today's DSV as well.
         index = self.get_date_index(seed_date)
         cumul_dsv = 0
-        for each_day in self.data[index:-1]:  # Index -2 because last item is always an incomplete day.
+        for each_day in self.data[index:]:  # Index -2 because last item is always an incomplete day.
             daily_dsv = each_day.get_daily_dsv(cumul_dsv)
             cumul_dsv += daily_dsv
             self.output_txt = self.output_txt + ("Station: %s | Date: %s | Daily DSV: %s | Cumulative DSV: %s | Count: %s | Avg. Temp: %.2f\n"
@@ -140,9 +160,10 @@ class WeatherStation(Packet):
         return cumul_dsv, self.output_txt  # Maybe return DSV straight from table and not just cumulative?
 
     def today_dsv(self, seed_date):  # What about for beginning of season where you have less than 1 day of data?!
-        todays_date = datetime.today()
+
         cumul_dsv, output_txt = self.today_dsv_package(seed_date)
-        if todays_date > datetime.strptime(todays_date.strftime("%Y-%m-%d") + " 12:00", "%Y-%m-%d %H:%M"):
+
+        if self.data[-1].period_size == MAXIMUM_PERIOD_SIZE:
             today_dsv = self.data[-1].get_daily_dsv(cumul_dsv)
         else:
             today_dsv = self.data[-2].get_daily_dsv(cumul_dsv)
@@ -162,125 +183,4 @@ class WeatherStation(Packet):
         return new_date <= daily_date_reset
 
 
-def date_to_hours(date_var):
-    return date_var.hour + date_var.minute/60.0
 
-
-def wisdom_dsv_lookup(period_count, avg_temperature_raw):
-
-    if avg_temperature_raw > 7.0:
-        avg_temperature = round(avg_temperature_raw)
-    else:
-        avg_temperature = avg_temperature_raw
-
-    dsv = 0
-    if 0 <= period_count < 39:
-        dsv = 0
-    elif (39 <= period_count <= 50) and (avg_temperature < 15.5):
-        dsv = 0
-    elif (39 <= period_count <= 50) and (avg_temperature >= 15.5):
-        dsv = 1
-    elif (51 <= period_count <= 62) and (avg_temperature < 12.5):
-        dsv = 0
-    elif (51 <= period_count <= 62) and (12.5 <= avg_temperature < 15.5):
-        dsv = 1
-    elif (51 <= period_count <= 62) and (avg_temperature >= 15.5):
-        dsv = 2
-    elif (63 <= period_count <= 74) and (avg_temperature < 12.5):
-        dsv = 1
-    elif (63 <= period_count <= 74) and (12.5 <= avg_temperature < 15.5):
-        dsv = 2
-    elif (63 <= period_count <= 74) and (avg_temperature >= 15.5):
-        dsv = 3
-    elif (75 <= period_count <= 86) and (avg_temperature < 12.5):
-        dsv = 2
-    elif (75 <= period_count <= 86) and (12.5 <= avg_temperature < 15.5):
-        dsv = 3
-    elif (75 <= period_count <= 86) and (avg_temperature >= 15.5):
-        dsv = 4
-    elif (87 <= period_count <= 96) and (avg_temperature < 12.5):
-        dsv = 3
-    elif (87 <= period_count <= 96) and (avg_temperature >= 12.5):
-        dsv = 4
-
-    return dsv
-
-
-def tomcast_dsv_lookup(period_count, avg_temperature_raw):
-
-    if avg_temperature_raw > 9.0:
-        avg_temperature = round(avg_temperature_raw)
-    else:
-        avg_temperature = avg_temperature_raw
-
-    dsv = 0
-    if 0 <= period_count <= 10:
-        dsv = 0
-    elif (11 <= period_count <= 14) and (avg_temperature < 20.5):
-        dsv = 0
-    elif (11 <= period_count <= 14) and (20.5 <= avg_temperature < 25.5):
-        dsv = 1
-    elif (11 <= period_count <= 14) and (avg_temperature >= 25.5):
-        dsv = 0
-    elif (15 <= period_count <= 22) and (avg_temperature < 17.5):
-        dsv = 0
-    elif (15 <= period_count <= 22) and (avg_temperature >= 17.5):
-        dsv = 1
-    elif (23 <= period_count <= 26) and (avg_temperature < 17.5):
-        dsv = 0
-    elif (23 <= period_count <= 26) and (17.5 <= avg_temperature < 20.5):
-        dsv = 1
-    elif (23 <= period_count <= 26) and (20.5 <= avg_temperature < 25.5):
-        dsv = 2
-    elif (23 <= period_count <= 26) and (avg_temperature >= 25.5):
-        dsv = 1
-    elif (27 <= period_count <= 34) and (avg_temperature < 20.5):
-        dsv = 1
-    elif (27 <= period_count <= 34) and (20.5 <= avg_temperature < 25.5):
-        dsv = 2
-    elif (27 <= period_count <= 34) and (avg_temperature >= 25.5):
-        dsv = 1
-    elif (35 <= period_count <= 50) and (avg_temperature < 17.5):
-        dsv = 1
-    elif (35 <= period_count <= 50) and (avg_temperature >= 17.5):
-        dsv = 2
-    elif (51 <= period_count <= 62) and (avg_temperature < 12.5):
-        dsv = 2
-    elif (51 <= period_count <= 62) and (12.5 <= avg_temperature < 17.5):
-        dsv = 1
-    elif (51 <= period_count <= 62) and (17.5 <= avg_temperature < 20.5):
-        dsv = 2
-    elif (51 <= period_count <= 62) and (20.5 <= avg_temperature < 25.5):
-        dsv = 3
-    elif (51 <= period_count <= 62) and (avg_temperature >= 25.5):
-        dsv = 2
-    elif (63 <= period_count <= 82) and (avg_temperature < 17.5):
-        dsv = 2
-    elif (63 <= period_count <= 82) and (avg_temperature >= 17.5):
-        dsv = 3
-    elif (83 <= period_count <= 90) and (avg_temperature < 20.5):
-        dsv = 3
-    elif (83 <= period_count <= 90) and (20.5 <= avg_temperature < 25.5):
-        dsv = 4
-    elif (83 <= period_count <= 90) and (avg_temperature >= 25.5):
-        dsv = 3
-    elif (91 <= period_count <= 96) and (avg_temperature < 17.5):
-        dsv = 3
-    elif (91 <= period_count <= 96) and (avg_temperature >= 17.5):
-        dsv = 4
-
-    return dsv
-
-
-def get_path_dir(directory, file_name, create=True):
-    cwd = os.getcwd()
-    file_base_dir = os.path.join(cwd, directory)
-    file_path = os.path.join(file_base_dir, file_name)
-
-    if not os.path.exists(file_base_dir):
-        raise Exception('Directory %s does not exist within working directory.' % directory)
-    if not create:
-        if not os.path.exists(file_path):
-            raise Exception('File %s does not exist within %s.' % (file_name, directory))
-
-    return file_path

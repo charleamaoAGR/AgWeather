@@ -7,7 +7,7 @@ import copy
 import sys
 import csv
 import os
-from UsefulClasses import get_path_dir
+from UsefulFunctions import get_path_dir
 
 """
 These functions are used to collect SWOB-ML data from the Environment Canada

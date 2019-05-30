@@ -1,20 +1,8 @@
-import urllib2
 from agweather_package import WeatherStation
 from agweather_package import get_path_dir
+from agweather_package import download_data
 from datetime import datetime
 import csv
-
-
-def download_data(url, local_data=False):
-
-    if local_data:
-        with open(get_path_dir('raw_output_data', 'mawp_15_test.txt'), 'r') as text_file:
-            data = text_file.read().split('\n')[1:-1]
-    else:
-        response = urllib2.urlopen(url)
-        data = response.read().split('\n')[1:-1]
-
-    return data
 
 
 def initialize_stations():
@@ -34,20 +22,10 @@ def initialize_stations():
                 stations_dict[station_id] = new_obj
             else:
                 stations_dict[station_id].add_data(data_list)
-
     return stations_dict
 
 
-def convert_douglas_csv():
-    with open(get_path_dir('input_data', 'Potato_blight_comparison-Douglas.csv'), 'r') as potato_csv:
-        contents = list(csv.reader(potato_csv, delimiter=','))
-        output_file = open(get_path_dir('raw_output_data', 'mawp_15_test.txt'), 'w+')
-        for each_line in contents:
-            output_file.write("%s\n" % ','.join(each_line))
-        output_file.close()
-
-
-def main():
+def show_all_stations_dsv():
 
     stations = initialize_stations()
     comparison_file = open(get_path_dir('raw_output_data', 'comparison.txt'), 'w+')
@@ -62,5 +40,4 @@ def main():
     comparison_file.close()
 
 
-main()
 
