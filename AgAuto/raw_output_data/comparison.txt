@@ -300,11 +300,12 @@ Station: 237 | Date: 2019-05-20 | Daily DSV: 0 | Cumulative DSV: 0 | Count: 0 | 
 Station: 237 | Date: 2019-05-21 | Daily DSV: 0 | Cumulative DSV: 0 | Count: 0 | Avg. Temp: 0.00
 Station: 237 | Date: 2019-05-22 | Daily DSV: 0 | Cumulative DSV: 0 | Count: 0 | Avg. Temp: 0.00
 Station: 237 | Date: 2019-05-23 | Daily DSV: 0 | Cumulative DSV: 0 | Count: 0 | Avg. Temp: 0.00
-Station: 237 | Date: 2019-05-24 | Daily DSV: 0 | Cumulative DSV: 0 | Count: 11 | Avg. Temp: 9.83
-Station: 237 | Date: 2019-05-25 | Daily DSV: 1 | Cumulative DSV: 1 | Count: 72 | Avg. Temp: 9.28
-Station: 237 | Date: 2019-05-26 | Daily DSV: 0 | Cumulative DSV: 1 | Count: 7 | Avg. Temp: 7.37
-Station: 237 | Date: 2019-05-27 | Daily DSV: 0 | Cumulative DSV: 1 | Count: 0 | Avg. Temp: 0.00
-Station: 237 | Date: 2019-05-28 | Daily DSV: 0 | Cumulative DSV: 1 | Count: 0 | Avg. Temp: 0.00
+Station: 237 | Date: 2019-05-24 | Daily DSV: 0 | Cumulative DSV: 0 | Count: 3 | Avg. Temp: 9.30
+Station: 237 | Date: 2019-05-25 | Daily DSV: 2 | Cumulative DSV: 2 | Count: 80 | Avg. Temp: 9.36
+Station: 237 | Date: 2019-05-26 | Daily DSV: 0 | Cumulative DSV: 2 | Count: 7 | Avg. Temp: 7.37
+Station: 237 | Date: 2019-05-27 | Daily DSV: 0 | Cumulative DSV: 2 | Count: 0 | Avg. Temp: 0.00
+Station: 237 | Date: 2019-05-28 | Daily DSV: 0 | Cumulative DSV: 2 | Count: 0 | Avg. Temp: 0.00
+Station: 237 | Date: 2019-05-29 | Daily DSV: 0 | Cumulative DSV: 2 | Count: 0 | Avg. Temp: 0.00
 Station: 230 | Date: 2019-05-02 | Daily DSV: 0 | Cumulative DSV: 0 | Count: 0 | Avg. Temp: 0.00
 Station: 230 | Date: 2019-05-03 | Daily DSV: 0 | Cumulative DSV: 0 | Count: 7 | Avg. Temp: 7.50
 Station: 230 | Date: 2019-05-04 | Daily DSV: 0 | Cumulative DSV: 0 | Count: 0 | Avg. Temp: 0.00

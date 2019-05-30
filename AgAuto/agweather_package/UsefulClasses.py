@@ -29,19 +29,19 @@ class DailyData:
         self.period_count = 0
 
     def add_data(self, time_stamp, temp, RH, rain, avg_ws, avg_wd):
-        self.data.append([date_to_hours(time_stamp), temp, RH, rain, avg_ws, avg_wd])
+        self.data.append([time_stamp, temp, RH, rain, avg_ws, avg_wd])
         self.period_size += 1
 
     def get_date(self):
         return self.date_var
 
-    def get_daily_data(self):
-        return self.data
+    def get_earliest_date(self):
+        return self.data[0][0]
 
     def get_daily_dsv(self, cumul_dsv):
         dsv = 0
 
-        if self.period_size == 96:  # Since we only look at 23.75 hour period there are only 95, 15 minute, time chunks?
+        if self.period_size > 86:  # If missing 10 periods then ignore.
             if cumul_dsv < 18:
                 params = self.wisdom_params()
                 self.period_count = params[0]
@@ -101,11 +101,6 @@ class WeatherStation(Packet):
             try:
                 date_info = datetime.strptime(items[0], '%Y-%m-%d %H:%M')
 
-                if not self.invalid_data_flag:
-                    if '-7999' in items:
-                        self.invalid_data_flag = True
-                        print "Station %s flagged for invalid data." % self.id
-
                 temp = float(items[2])
                 RH = int(items[3])
                 rain = float(items[4])
@@ -116,9 +111,11 @@ class WeatherStation(Packet):
                     self.add_date(date_info + timedelta(days=1))  # Creates and adds new DailyData object.
                     self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)
                 elif self.data_size > 0:
-                    if ((date_info + timedelta(days=1)) - self.data[-1].get_date()).days < 1:
+                    if self.check_valid_range(self.data[-1].get_earliest_date(), date_info):
                         self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)
                     else:
+                        if self.data[-1].period_size <= 86 and not self.invalid_data_flag:
+                            self.invalid_data_flag = True
                         self.add_date(date_info + timedelta(days=1))
                         self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)  # Add 12:15 PM data
 
@@ -130,10 +127,9 @@ class WeatherStation(Packet):
         self.data.append(new_day)
         self.data_size += 1
 
-    def today_cumulative_dsv(self, seed_date):  # Create function to get just today's DSV as well.
-        cumul_dsv = 0
+    def today_dsv_package(self, seed_date):  # Create function to get just today's DSV as well.
         index = self.get_date_index(seed_date)
-
+        cumul_dsv = 0
         for each_day in self.data[index:-1]:  # Index -2 because last item is always an incomplete day.
             daily_dsv = each_day.get_daily_dsv(cumul_dsv)
             cumul_dsv += daily_dsv
@@ -143,12 +139,15 @@ class WeatherStation(Packet):
 
         return cumul_dsv, self.output_txt  # Maybe return DSV straight from table and not just cumulative?
 
-    def today_dsv(self, seed_date):
-        return self.data[-2].get_daily_dsv(self.today_cumulative_dsv(seed_date))
+    def today_dsv(self, seed_date):  # What about for beginning of season where you have less than 1 day of data?!
+        todays_date = datetime.today()
+        cumul_dsv, output_txt = self.today_dsv_package(seed_date)
+        if todays_date > datetime.strptime(todays_date.strftime("%Y-%m-%d") + " 12:00", "%Y-%m-%d %H:%M"):
+            today_dsv = self.data[-1].get_daily_dsv(cumul_dsv)
+        else:
+            today_dsv = self.data[-2].get_daily_dsv(cumul_dsv)
 
-    def show_data(self):
-        for each_day in self.data:
-            print each_day.get_daily_dsv(0)
+        return today_dsv, cumul_dsv, output_txt
 
     def get_date_index(self, seed_date):
         index = 0
@@ -157,6 +156,10 @@ class WeatherStation(Packet):
                 break
             index += 1
         return index
+
+    def check_valid_range(self, daily_date, new_date):
+        daily_date_reset = datetime.strptime(daily_date.strftime("%Y-%m-%d") + " 12:00", "%Y-%m-%d %H:%M") + timedelta(days=1)
+        return new_date <= daily_date_reset
 
 
 def date_to_hours(date_var):
