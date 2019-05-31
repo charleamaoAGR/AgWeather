@@ -16,7 +16,6 @@ from agweather_package import DailyUpload as daily
 from pyfiglet import Figlet
 import csv
 
-
 """
 Purpose: user_in() serves as the user interface for AgAuto. The function
 will first print a list of choices that are available. Typing out the 
@@ -33,11 +32,11 @@ def user_in():
     choices = ["dailyUpload", "mawpCleaner", "debug", "calcPotatoDSV", "q"]
     print "[1] dailyUpload\n[2] mawpCleaner\n[3] calcPotatoDSV\n[q] Quit"
     choice = ''
-    
+
     # Program will keep asking for which programs to run until user inputs 'q'.
     while choice != 'q':
         choice = raw_input("Which program do you want to run?:")
-        
+
         if choice == 'dailyUpload':
             daily.update_dailyEC()
         elif choice == 'mawpCleaner':
@@ -63,5 +62,5 @@ def main():
     # update_dailyEC()
     user_in()
     
-    
+
 main()

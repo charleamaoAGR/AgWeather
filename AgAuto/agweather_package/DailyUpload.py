@@ -1,7 +1,9 @@
 from agweather_package import xml_parser as parse
 from agweather_package import get_path_dir
 from datetime import date, timedelta
+from tqdm import tqdm
 import csv
+
 
 urlroot = "http://dd.weather.gc.ca/observations/xml/MB/yesterday/"
 MAXTEMP = 2
@@ -169,7 +171,14 @@ def cleanData(filename):
         file_wip = open(filename, "r")
         new_contents = ""
 
+        count = 0
+
         for line in file_wip:
+            count += 1
+
+        file_wip.seek(0)
+
+        for line in tqdm(file_wip, desc="Cleaning %s" % filename, total=count):
 
             # If the length of the line is less than or equal to 1, then don't add it to the output.
             if len(line) > 1:
@@ -296,7 +305,7 @@ def getUpdatedDailyData(urlroot, strdate_dash, daily_contents, updated_daily_con
         size = len(daily_contents)
 
         # Loop through each line in daily_contents.
-        for row in daily_contents:
+        for row in tqdm(daily_contents, total=size):
 
             # Grab the station identifiers (i.e. Station ID, description) along with the new date.
             new_row = ["C%s" % stations[stations_count].split(':')[0], row[1].strip('\n'), strdate_dash]

@@ -2,15 +2,18 @@ from agweather_package import WeatherStation
 from agweather_package import get_path_dir
 from agweather_package import download_data
 from datetime import datetime
+from tqdm import tqdm
 import csv
+
 
 
 def initialize_stations():
     data = download_data('https://mbagweather.ca/partners/win/mawp15.txt')
     stations_dict = {}
     station_ids = set()
+    size = len(data)
 
-    for each in data:
+    for each in tqdm(data, desc="Calculating station DSVs", total=size):
         data_list = each.strip('\n').split(',')
         station_id = data_list[1]
 
