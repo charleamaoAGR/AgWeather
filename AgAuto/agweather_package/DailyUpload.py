@@ -1,5 +1,17 @@
+"""
+Created on Wed May 15 9:00:00 2019
+
+@author: CAmao
+
+Purpose: DailyUpload contains all necessary functions required to automate the DailyDataUpload task
+outlined in the job aid of the same name.
+
+Date modified: Fri May 31 2019
+"""
+
 from agweather_package import xml_parser as parse
 from agweather_package import get_path_dir
+from agweather_package import download_txt_request
 from datetime import date, timedelta
 from tqdm import tqdm
 import csv
@@ -168,6 +180,7 @@ Parameters:
 def cleanData(filename):
     # Change this later to a more general case. Maybe user input?
     try:
+        download_txt_request('https://mbagweather.ca/partners/mbag' + '//' + filename,  filename, "")
         file_wip = open(filename, "r")
         new_contents = ""
 

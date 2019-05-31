@@ -1,3 +1,14 @@
+"""
+Created on Fri May 31 9:00:00 2019
+
+@author: CAmao
+
+Purpose: PotatoBlight contains the necessary functions to calculate all station DSVs listed in
+'2018 Permanent Stations.xlsx'.
+
+Date modified: Fri May 31 2019
+"""
+
 from datetime import datetime, timedelta
 from UsefulFunctions import get_path_dir
 from UsefulFunctions import date_to_hours

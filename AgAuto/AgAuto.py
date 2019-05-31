@@ -10,11 +10,12 @@ the different automation programs for AgWeather.
 Date modified: Tue May 21 2019
 """
 
-from datetime import date, timedelta
 from agweather_package import PotatoBlight as potato
 from agweather_package import DailyUpload as daily
+from agweather_package import get_path_dir
 from pyfiglet import Figlet
-import csv
+from tqdm import tqdm
+import requests
 
 """
 Purpose: user_in() serves as the user interface for AgAuto. The function
@@ -30,7 +31,7 @@ def user_in():
     print rendered_text.renderText('AgAuto')
 
     choices = ["dailyUpload", "mawpCleaner", "debug", "calcPotatoDSV", "q"]
-    print "[1] dailyUpload\n[2] mawpCleaner\n[3] calcPotatoDSV\n[q] Quit"
+    print "[1] dailyUpload\n[2] mawpCleaner\n[3] calcPotatoDSV\n[4] debug\n[q] Quit"
     choice = ''
 
     # Program will keep asking for which programs to run until user inputs 'q'.
@@ -46,16 +47,20 @@ def user_in():
             daily.cleanData(file_60)
         elif choice == 'calcPotatoDSV':
             potato.show_all_stations_dsv()
+        elif choice == 'debug':
+            debug()
         elif choice not in choices:
             print "Input error. Please pick from list of commands.\n"
 
 
 def debug():
-    strdate_dash = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
-    daily_csv = open("DailyEC.csv", 'r')
-    daily_contents = list(csv.reader(daily_csv, delimiter=','))
-    
-    print daily.getEarlyDates(daily_contents, strdate_dash)
+    r = requests.get('https://mbagweather.ca/partners/win/mawp15.txt', stream=True)
+    chunkSize = 1024
+    with open(get_path_dir('input_data', 'mawp15.txt'), 'wb') as mawp15:
+        pbar = tqdm(unit="B", total=int(r.headers['Content-Length']))
+        for chunk in r.iter_content(chunk_size=chunkSize):
+            pbar.update(len(chunk))
+            mawp15.write(chunk)
 
 
 def main():

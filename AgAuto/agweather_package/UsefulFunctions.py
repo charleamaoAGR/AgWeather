@@ -1,6 +1,8 @@
 import os
 import csv
 import urllib2
+import requests
+from tqdm import tqdm
 
 
 def get_path_dir(directory, file_name, create=True):
@@ -27,6 +29,24 @@ def download_data(url, local_data=False):
         data = response.read().split('\n')[1:-1]
 
     return data
+
+
+def download_txt_request(url, file_name, default_folder='input_data'):
+
+    with requests.get(url, stream=True) as r:
+        chunkSize = 1024
+        with open(get_path_dir(default_folder, file_name), 'wb') as raw_file:
+            for chunk in tqdm(iterable=r.iter_content(chunk_size=chunkSize), total=int(r.headers['Content-Length']) / chunkSize, unit='KB', desc="Downloading %s" %file_name):
+                raw_file.write(chunk)
+
+
+def split_text_file(file_name, default_folder='input_data', start_index=1, end_index=-1):
+
+    raw_file = open(get_path_dir(default_folder, file_name), 'r')
+    output_text = raw_file.read().split('\n')[start_index:end_index]
+    raw_file.close()
+
+    return output_text
 
 
 def convert_input_csv(csv_file_name, output_file_name, input_folder='input_data', output_folder='raw_output_data'):
