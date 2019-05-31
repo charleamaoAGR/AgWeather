@@ -30,14 +30,18 @@ def show_all_stations_dsv():
     stations = initialize_stations()
     comparison_file = open(get_path_dir('raw_output_data', 'comparison.txt'), 'w+')
     output_txt = ""
+    csv_file = open(get_path_dir('raw_output_data', 'station_dsv.csv'), 'wb')
+    csv_obj = csv.writer(csv_file, delimiter=',')
+    csv_obj.writerow(['Station', 'Cumulative DSV', 'Today DSV'])
     for each in stations.values():
         if each.invalid_data_flag:
             print "Station %s flagged for invalid data. May have skipped some days for this station." % each.get_id()
         daily_dsv, cumul_dsv, new_txt = each.today_dsv(datetime.strptime("2019-05-02", '%Y-%m-%d'))
         output_txt += new_txt
-        print "Station - %s | Cumulative DSV - %s | Today DSV - %s" % (each.get_id(), cumul_dsv, daily_dsv)
+        csv_obj.writerow([each.get_id(), cumul_dsv, daily_dsv])
     comparison_file.write(output_txt)
     comparison_file.close()
+    csv_file.close()
 
 
 
