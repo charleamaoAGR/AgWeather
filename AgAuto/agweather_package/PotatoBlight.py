@@ -68,6 +68,7 @@ based on a specified seed date of the format YYYY-MM-DD.
 
 
 def show_all_stations_dsv():
+    user_date = raw_input("\nPlease specify a \"seed\" date (YYYY-MM-DD):")
     # Use initialize_stations to get us the dictionary of WeatherStation objects.
     stations = initialize_stations()
     # Create/overwrite the comparison.txt file.
@@ -84,7 +85,7 @@ def show_all_stations_dsv():
         if each.invalid_data_flag:
             print "Station %s flagged for invalid data. May have skipped some days for this station." % each.get_id()
         # Calculate the daily dsv and cumulative dsv, and get calculations.
-        daily_dsv, cumul_dsv, new_txt = each.today_dsv(datetime.strptime("2019-05-02", '%Y-%m-%d'))
+        daily_dsv, cumul_dsv, new_txt = each.today_dsv(datetime.strptime(user_date.strip(), '%Y-%m-%d'))
         # Add the new calculations to the result string.
         output_txt += new_txt
         # Write the dsv values into the station_dsv.csv.
