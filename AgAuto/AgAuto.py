@@ -51,6 +51,7 @@ def user_in():
             debug()
         elif choice not in choices:
             print "Input error. Please pick from list of commands.\n"
+        print '\n'
 
 
 def debug():

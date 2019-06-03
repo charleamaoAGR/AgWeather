@@ -69,14 +69,19 @@ based on a specified seed date of the format YYYY-MM-DD.
 
 def show_all_stations_dsv():
     user_date = raw_input("\nPlease specify a \"seed\" date (YYYY-MM-DD):")
+
     # Use initialize_stations to get us the dictionary of WeatherStation objects.
     stations = initialize_stations()
     # Create/overwrite the comparison.txt file.
     comparison_file = open(get_path_dir('raw_output_data', 'comparison.txt'), 'w+')
+
     output_txt = ""
+
     # Create/overwrite the station_dsv.csv file.
     csv_file = open(get_path_dir('raw_output_data', 'station_dsv.csv'), 'wb')
+
     csv_obj = csv.writer(csv_file, delimiter=',')
+
     # Write the headers first.
     csv_obj.writerow(['Station', 'Cumulative DSV', 'Today DSV'])
     # Iterate through each WeatherStation object.
