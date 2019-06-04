@@ -5,13 +5,30 @@ import requests
 from tqdm import tqdm
 
 
+"""
+Purpose: The get_path_dir is responsible for returning a string of a valid file path to a file in the AgAuto cwd if
+given a valid directory within the AgAuto cwd and a file within the cwd.
+
+Parameters:
+    - directory: Must be a folder that exists within the AgAuto cwd.
+    - file_name: The file that you want to access within directory.
+    - create: If True, then get_path_dir will not care that the file doesn't exist in directory yet as it assumes
+    it will be created using the file path that get_path_dir returns.
+"""
+
+
 def get_path_dir(directory, file_name, create=True):
+    # Gets the path of the working directory (i.e. AgAuto's working directory).
     cwd = os.getcwd()
+    # Add directory to the working directory path.
     file_base_dir = os.path.join(cwd, directory)
+    # Add file_name to the new path created above.
     file_path = os.path.join(file_base_dir, file_name)
 
+    # If the directory doesn't exist then raise an Exception.
     if not os.path.exists(file_base_dir):
         raise Exception('Directory %s does not exist within working directory.' % directory)
+    # Raise an exception only if the user specifies create = False. Otherwise, assume they will create after.
     if not create:
         if not os.path.exists(file_path):
             raise Exception('File %s does not exist within %s.' % (file_name, directory))
@@ -29,6 +46,11 @@ def download_data(url, local_data=False):
         data = response.read().split('\n')[1:-1]
 
     return data
+
+
+"""
+Purpose: download_txt_request's role is to download any file with 
+"""
 
 
 def download_txt_request(url, file_name, default_folder='input_data'):

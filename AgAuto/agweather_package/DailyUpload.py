@@ -318,7 +318,7 @@ def getUpdatedDailyData(urlroot, strdate_dash, daily_contents, updated_daily_con
         size = len(daily_contents)
 
         # Loop through each line in daily_contents.
-        for row in tqdm(daily_contents, desc="Updating DailyEC", total=size):
+        for row in daily_contents:
 
             # Grab the station identifiers (i.e. Station ID, description) along with the new date.
             new_row = ["C%s" % stations[stations_count].split(':')[0], row[1].strip('\n'), strdate_dash]
