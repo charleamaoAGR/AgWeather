@@ -15,6 +15,7 @@ from agweather_package import DailyUpload as daily
 from agweather_package import get_path_dir
 from pyfiglet import Figlet
 from tqdm import tqdm
+from agweather_package import grib_grab
 import requests
 
 """
@@ -55,13 +56,7 @@ def user_in():
 
 
 def debug():
-    r = requests.get('https://mbagweather.ca/partners/win/mawp15.txt', stream=True)
-    chunkSize = 1024
-    with open(get_path_dir('input_data', 'mawp15.txt'), 'wb') as mawp15:
-        pbar = tqdm(unit="B", total=int(r.headers['Content-Length']))
-        for chunk in r.iter_content(chunk_size=chunkSize):
-            pbar.update(len(chunk))
-            mawp15.write(chunk)
+    grib_grab()
 
 
 def main():
