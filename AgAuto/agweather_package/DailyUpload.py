@@ -94,7 +94,7 @@ def dict_summary(csv_file):
         precip = line[PRECIP]
         station_id = line[1].strip()
 
-        if check_station(station_id, get_EC_station_ids()):
+        if check_station(station_id, get_EC_station_ids(need_alternative=True)):
             if (max_temp == "" or min_temp == "" or precip == "") and station_id != "" and station_id != "WPO":
                 print "Empty fields exist for station ID: %s. Please review Daily EC" % station_id
             if precip.strip() == "Trace":
@@ -158,11 +158,27 @@ def get_EC_stations():
     return stations_list
 
 
-def get_EC_station_ids():
+def get_EC_station_ids(need_alternative=False):
     station_ids = []
     with open(get_path_dir('config_files', 'stations.txt'), 'r') as stations:
         for each_line in stations:
             station_id = each_line.split(':')[0]
+            if need_alternative:
+                if station_id == "YPG":
+                    correct_id = "WPG"
+                elif station_id == "YGM":
+                    correct_id = "PGH"
+                elif station_id == "YWG":
+                    correct_id = "XWG"
+                elif station_id == "YQD":
+                    correct_id = "PQD"
+                elif station_id == "YDN":
+                    correct_id = "WZT"
+                elif station_id == "YBR":
+                    correct_id = "PBO"
+                else:
+                    correct_id = station_id
+                station_id = correct_id
             station_ids.append(station_id)
 
     return station_ids
