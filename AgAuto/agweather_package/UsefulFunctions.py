@@ -2,7 +2,6 @@ import os
 import csv
 import urllib2
 import requests
-import pupygrib as pupy
 from tqdm import tqdm
 
 
@@ -198,21 +197,3 @@ def tomcast_dsv_lookup(period_count, avg_temperature_raw):
         dsv = 4
 
     return dsv
-
-
-def grib_grab():
-
-    url_test = "https://nomads.ncep.noaa.gov/cgi-bin/filter_nam.pl?file=FILENAME" \
-               "&lev_0-0.1_m_below_ground=on&lev_0.1-0.4_m_below_ground=on&lev_0.4-1_m_below_ground=on" \
-               "&lev_10_m_above_ground=on&lev_2_m_above_ground=on&lev_planetary_boundary_layer=on" \
-               "&lev_surface=on&var_GUST=on&var_HGT=on&var_VRATE=on&subregion=&leftlon=-101.7&rightlon=-95.1&toplat=52.9" \
-               "&bottomlat=48.9&dir=%2Fnam.20190610"
-
-    url_test = url_test.replace('FILENAME', 'nam.t00z.awphys00.tm00.grib2')
-
-    download_grib_request(url_test, 'grib_test.grib2')
-
-    with open(get_path_dir('input_data', 'grib_test.grib2'), 'rb') as stream:
-        for i, msg in enumerate(pupy.read(stream), 1):
-            values = msg.get_values()
-            print "values: %s\n" % values

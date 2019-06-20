@@ -15,7 +15,6 @@ from agweather_package import DailyUpload as daily
 from agweather_package import get_path_dir
 from pyfiglet import Figlet
 from tqdm import tqdm
-from agweather_package import grib_grab
 import requests
 
 """
@@ -56,7 +55,7 @@ def user_in():
 
 
 def debug():
-    grib_grab()
+    print ":p"
 
 
 def main():
