@@ -15,6 +15,9 @@ from agweather_package import DailyUpload as daily
 from agweather_package import get_path_dir
 from pyfiglet import Figlet
 from tqdm import tqdm
+from subprocess import call
+from os import getcwd, path
+from time import sleep
 import requests
 
 """
@@ -31,7 +34,7 @@ def user_in():
     print rendered_text.renderText('AgAuto')
 
     choices = ["dailyUpload", "mawpCleaner", "debug", "calcPotatoDSV", "q"]
-    print "[1] dailyUpload\n[2] mawpCleaner\n[3] calcPotatoDSV\n[4] debug\n[q] Quit"
+    print "[1] dailyUpload\n[2] mawpCleaner \n[3] calcPotatoDSV\n[4] debug\n[q] Quit"
     choice = ''
 
     # Program will keep asking for which programs to run until user inputs 'q'.
@@ -40,6 +43,18 @@ def user_in():
 
         if choice == 'dailyUpload':
             daily.update_dailyEC()
+            file_24 = "mawp24raw.txt"
+            file_60 = "mawp60raw.txt"
+            daily.cleanData(file_24)
+            daily.cleanData(file_60)
+            daily.gen_Bat_file()
+            in_me = False
+            while not in_me:
+                in_me = daily.in_managed_environment()
+                sleep(4)
+            if in_me:
+                call(path.join(getcwd(), 'AgAuto_batch.bat'))
+
         elif choice == 'mawpCleaner':
             file_24 = "mawp24raw.txt"
             file_60 = "mawp60raw.txt"
@@ -55,7 +70,11 @@ def user_in():
 
 
 def debug():
-    print ":p"
+    in_ME = False
+    while not in_ME:
+        in_ME = daily.in_managed_environment()
+    if in_ME:
+        call(path.join(getcwd(), 'AgAuto_batch.bat'))
 
 
 def main():

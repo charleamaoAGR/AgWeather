@@ -14,6 +14,7 @@ from agweather_package import get_path_dir
 from agweather_package import download_txt_request
 from datetime import date, timedelta
 from tqdm import tqdm
+from os import getcwd, path
 import csv
 
 
@@ -387,3 +388,33 @@ def check_station(station_id, stations):
         is_our_station = True
 
     return is_our_station
+
+
+def gen_Bat_file():
+
+    bat_skeleton = r"""
+    cd FILE_PATH
+    copy DailyEC.csv \\MBPApp0964P\Shared_Data\AgWeather\upload
+    copy mawp24raw.txt \\MBPApp0964P\Shared_Data\AgWeather\upload
+    copy mawp60raw.txt \\MBPApp0964P\Shared_Data\AgWeather\upload
+    """
+
+    # Replaces all instances of FILE_PATH with the path to the 'input_data' folder.
+    bat_skeleton = bat_skeleton.replace('FILE_PATH', getcwd())
+
+    with open('AgAuto_batch.bat', 'wb') as bat_file:
+        bat_file.write(bat_skeleton)
+
+
+def in_managed_environment():
+    if path.exists(r'\\MBPApp0964P\Shared_Data\AgWeather\upload'):
+        in_ME = True
+        print 'Successfully connected to managed environment. Will copy files now.'
+    else:
+        choice = raw_input('Could not connect to managed environment, likely ethernet is not plugged in. Try again? '
+                           '(yes/no):')
+        if choice == 'yes':
+            in_ME = False
+        else:
+            raise Exception("DailyUpload unsuccesful. Process was terminated.")
+    return in_ME
