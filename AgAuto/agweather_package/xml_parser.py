@@ -214,7 +214,11 @@ def parse_mbag_xml(link_base_url_root, strdate, title_dict={}, clean_dict={}, cl
 def parse_single_xml(xml_link):
     total_xml_data = []
 
-
+    try:
+        xml_file = urllib2.urlopen(xml_link)
+        xml_obj = ElementTree.parse(xml_file)
+    except urllib2.URLError:
+        pass
 
 def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict={}, clean=False, default_order=500, default_config="mbag"):
     """
