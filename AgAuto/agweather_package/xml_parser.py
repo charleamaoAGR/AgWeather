@@ -4,9 +4,7 @@ from xml.etree import ElementTree
 import urllib2
 import xlwt
 import copy
-import sys
 import csv
-import os
 from UsefulFunctions import get_path_dir
 
 """
@@ -16,8 +14,8 @@ Datastore.  The data can be organized into CSV and Excel formats using the funct
 See the 'main' section of this file for examples
 """
 
-#urlroot = "http://dd.weather.gc.ca/observations/swob-ml/"
-#urlroot = "http://dd.weather.gc.ca/observations/xml/MB/yesterday/"
+# urlroot = "http://dd.weather.gc.ca/observations/swob-ml/"
+# urlroot = "http://dd.weather.gc.ca/observations/xml/MB/yesterday/"
 
 
 def get_html_string(url):
@@ -27,21 +25,22 @@ def get_html_string(url):
     :returns: (str) the string representation of the html at a url
     """
     catcher = 0
-    while(catcher <3):
+    while catcher < 3:
         try:
             URLObj = urllib2.urlopen(url)
             html_string = URLObj.read().decode('utf-8')
-            catcher=3
+            catcher = 3
             return html_string
         except:
             print "Link retrieval error on:"
             print url
             html_string = ""
-            catcher+=1
-            if(catcher==3):
+            catcher += 1
+            if catcher == 3:
                 return html_string
             else:
                 print "Trying again"
+
 
 def get_stations_list(urlroot, strdate):
     """
@@ -55,13 +54,14 @@ def get_stations_list(urlroot, strdate):
     all_stations_soup = BeautifulSoup.BeautifulSoup(all_stations_html)
 
     for tag in all_stations_soup.findAll('a', href=True):
-        #length is 5: eg. "CVSL/", we remove the "/" to get station name
+        # length is 5: eg. "CVSL/", we remove the "/" to get station name
         if tag['href'].__len__() == 5:
-            tag['href'] = tag['href'].replace("/","")
-            tag['href'] = tag['href'][1:].encode('ascii','ignore')
+            tag['href'] = tag['href'].replace("/", "")
+            tag['href'] = tag['href'][1:].encode('ascii', 'ignore')
             all_stations_list.append(tag['href'])
     
     return all_stations_list
+
 
 def clean_incoming(clean_info_filename="in.txt", default_order=500):
     """
@@ -84,16 +84,16 @@ def clean_incoming(clean_info_filename="in.txt", default_order=500):
         clean_info_file_obj = file(get_path_dir("config_files", clean_info_filename), 'rb')
         split = csv.reader(clean_info_file_obj, delimiter=',', skipinitialspace=True)
         for line_data_list in split:
-            if line_data_list.__len__()<=3:
+            if line_data_list.__len__() <= 3:
                 clean = True
                 line_data_list.append(default_order)
-                clean_info[line_data_list[0]]=[line_data_list[1],line_data_list[2]]
-                #clean_info["date_tm"] = ["date_tm", -3]
-                #clean_info["tc_id"]   = ["TC ID", -2]
-                #clean_info["stn_nam"] = ["Station Name", -1]
-                #clean_info["lat"]     = ["lat", -120]
-                #clean_info["long"]    = ["long", -120]
-                #clean_info["msc/observation/atmospheric/surface_weather/ca-1.0-ascii"]=["mscschema", -100]
+                clean_info[line_data_list[0]] = [line_data_list[1], line_data_list[2]]
+                # clean_info["date_tm"] = ["date_tm", -3]
+                # clean_info["tc_id"]   = ["TC ID", -2]
+                # clean_info["stn_nam"] = ["Station Name", -1]
+                # clean_info["lat"]     = ["lat", -120]
+                # clean_info["long"]    = ["long", -120]
+                # clean_info["msc/observation/atmospheric/surface_weather/ca-1.0-ascii"]=["mscschema", -100]
     except:
         clean = False
         if clean_info_filename != "OFF":
@@ -119,35 +119,35 @@ def parse_xml_links(link_base_url_root, xml_links, title_dict={}, clean_dict={},
     :returns: (list, list) a list of dicts where each dict is the xml data from one link, and a list of sorted titles
     """
     total_xml_data = []
-    if(default_config == "mbag"):
-        xml_links = [xml_links[-2]] #gets the latest, english file.
+    if default_config == "mbag":
+        xml_links = [xml_links[-2]]  # gets the latest, english file.
     for xml_address in xml_links:
-        catcher=0
-        while(catcher<3):
+        catcher = 0
+        while catcher < 3:
             try:
-                #maybe use xml_file as a local file so you don't have to connect to phone wifi.
+                # maybe use xml_file as a local file so you don't have to connect to phone wifi.
                 xml_file = urllib2.urlopen(link_base_url_root + xml_address)
                 xml_parser_obj = ElementTree.parse(xml_file)
-                catcher=3
+                catcher = 3
             except:
-                catcher+=1
+                catcher += 1
                 print "Error opening xmladdress" + xml_address
                 
             lastname = ""
             single_xml_data = {}
             el_tree = xml_parser_obj.getiterator()
             for node in el_tree:
-                name  = node.attrib.get('name')
+                name = node.attrib.get('name')
                 value = node.attrib.get('value')
-                uom   = unicode(node.attrib.get('uom')).encode('ascii','ignore')
+                uom = unicode(node.attrib.get('uom')).encode('ascii', 'ignore')
                 order = int(default_order)
-                qual  = "qa_none"
-               #print '%s = %s' %(name,value)
+                qual = "qa_none"
+
                 if name == "qa_summary":
                     qual = str(value)
                     single_xml_data[lastname][3] = qual
                 else:
-                    if clean == True:
+                    if clean:
                         try:
                             order = int(clean_dict[name][1])
                             # Modify name last (lookups depend on it)
@@ -160,57 +160,60 @@ def parse_xml_links(link_base_url_root, xml_links, title_dict={}, clean_dict={},
                   
                 lastname = name
             total_xml_data.append(single_xml_data)
-            title_list_sorted = sorted(title_dict.iteritems(),key=itemgetter(1), reverse=False)
+            title_list_sorted = sorted(title_dict.iteritems(), key=itemgetter(1), reverse=False)
 
     return total_xml_data, title_list_sorted
 
 
-def parse_mbag_xml(link_base_url_root, strdate,title_dict={}, clean_dict={}, clean=False, default_order=500):
+def parse_mbag_xml(link_base_url_root, strdate, title_dict={}, clean_dict={}, clean=False, default_order=500):
     total_xml_data = []
-    xml_address = "yesterday_mb_%s_e.xml" %(strdate) 
-    catcher=0
-    while(catcher<3):
-            try:
-                #maybe use xml_file as a local file so you don't have to connect to phone wifi.
-                xml_file = urllib2.urlopen(link_base_url_root + xml_address)
-                xml_parser_obj = ElementTree.parse(xml_file)
-                catcher=3
-            except:
-                catcher+=1
-                print "Error opening xmladdress" + xml_address
-                
-            lastname = ""
-            single_xml_data = {}
-            el_tree = xml_parser_obj.getroot().getchildren()
-            for node in el_tree:
-                single_xml_data = {}
-                data_nodes = node.getchildren()
-                identification_node = data_nodes[0].getchildren()[0].getchildren()[0].getchildren()[-1]
-                result_node = data_nodes[-1].getchildren()[-1]
-                for each_node in [identification_node, result_node.getchildren()[0]]:
-                    for each_element in each_node.getchildren():
-                        name  = each_element.attrib.get('name')
-                        value = each_element.attrib.get('value')
-                        uom   = unicode(each_element.attrib.get('uom')).encode('ascii','ignore')
-                        order = int(default_order)
-                        qual  = "qa_none"
+    xml_address = "yesterday_mb_%s_e.xml" % strdate
+    catcher = 0
+    while catcher < 3:
+        try:
+            # maybe use xml_file as a local file so you don't have to connect to phone wifi.
+            xml_file = urllib2.urlopen(link_base_url_root + xml_address)
+            xml_parser_obj = ElementTree.parse(xml_file)
+            catcher = 3
+        except:
+            catcher += 1
+            print "Error opening xmladdress" + xml_address
 
-                        if clean:
-                            try:
-                                order = int(clean_dict[name][1])
+        el_tree = xml_parser_obj.getroot().getchildren()
+        for node in el_tree:
+            single_xml_data = {}
+            data_nodes = node.getchildren()
+            identification_node = data_nodes[0].getchildren()[0].getchildren()[0].getchildren()[-1]
+            result_node = data_nodes[-1].getchildren()[-1]
+            for each_node in [identification_node, result_node.getchildren()[0]]:
+                for each_element in each_node.getchildren():
+                    name = each_element.attrib.get('name')
+                    value = each_element.attrib.get('value')
+                    uom = unicode(each_element.attrib.get('uom')).encode('ascii', 'ignore')
+                    order = int(default_order)
+                    qual = "qa_none"
+
+                    if clean:
+                        try:
+                            order = int(clean_dict[name][1])
                             # Modify name last (lookups depend on it)
-                                name = clean_dict[name][0]
-                            except:
-                                pass
-                            
-                        single_xml_data[name] = [value, uom, order, qual]
-                        title_dict[name] = [order, uom]
-                single_xml_copy = dict(single_xml_data)
-                total_xml_data.append(single_xml_copy)
-                
-            title_list_sorted = sorted(title_dict.iteritems(),key=itemgetter(1), reverse=False)    
-    
+                            name = clean_dict[name][0]
+                        except:
+                            pass
+
+                    single_xml_data[name] = [value, uom, order, qual]
+                    title_dict[name] = [order, uom]
+            single_xml_copy = dict(single_xml_data)
+            total_xml_data.append(single_xml_copy)
+
+        title_list_sorted = sorted(title_dict.iteritems(), key=itemgetter(1), reverse=False)
+
     return total_xml_data, title_list_sorted
+
+
+def parse_single_xml(xml_link):
+    total_xml_data = []
+
 
 
 def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict={}, clean=False, default_order=500, default_config="mbag"):
@@ -219,7 +222,8 @@ def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict
     :param urlroot: (str) the url root from which all SWOB-ML dates are listed
     :param strdate: (str) the date in "YYYYMMDD" format to get the station data on
     :param station: (str) the three (or four) character station identifier eg. "VSL"
-    :param title_dict: (dict optional) a dictionary in {'field' : [order,uom],...} format for later formatting of field names
+    :param title_dict: (dict optional) a dictionary in {'field' : [order,uom],...} format for later formatting of field
+    names
            Default: {}
     :param clean_dict: (dict optional) a dictionary of 
            {"field_name":["Readable Field Name",(int) Priority],...} format
@@ -228,7 +232,8 @@ def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict
            Default: False
     :param default_order: (int optional) the desired default order for fields to appear in outputs in.
            Default: 500
-    :returns: (list, list) a list of dicts where each dict is the xml data from one hour at the station, and a list of sorted titles
+    :returns: (list, list) a list of dicts where each dict is the xml data from one hour at the station, and a list of
+    sorted titles
     """
     if station.__len__() == 3:
         station = "C" + station
@@ -244,13 +249,16 @@ def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict
     
     for tag in one_station_soup.findAll('a', href=True):
         if ".xml" in tag['href']:
-            file_name = tag['href'].encode('ascii','ignore')
+            file_name = tag['href'].encode('ascii', 'ignore')
             one_station_xml_links.append(file_name)
     
     if default_config == "mbag":
-        one_station_data_list, ordered_titles = parse_mbag_xml(one_station_url, strdate, title_dict=title_dict, clean_dict=clean_dict, clean=clean)
+        one_station_data_list, ordered_titles = parse_mbag_xml(one_station_url, strdate, title_dict=title_dict,
+                                                               clean_dict=clean_dict, clean=clean)
     else:
-        one_station_data_list, ordered_titles = parse_xml_links(one_station_url, one_station_xml_links, title_dict=title_dict, clean_dict=clean_dict, clean=clean)
+        one_station_data_list, ordered_titles = parse_xml_links(one_station_url, one_station_xml_links,
+                                                                title_dict=title_dict, clean_dict=clean_dict,
+                                                                clean=clean)
 
     return one_station_data_list, ordered_titles
 
@@ -266,7 +274,7 @@ def order_row(row, ordered_titles):
     """
     ordered_row = []
     for name in ordered_titles:
-        ordered_row.append(str(row.get(name[0],[""])[0]))
+        ordered_row.append(str(row.get(name[0], [""])[0]))
     
     return ordered_row
 
@@ -341,22 +349,22 @@ def get_fonts():
     fonts['style2'].font = fonts['font2']
     fonts['stylea'] = xlwt.easyxf('pattern: pattern solid;')
     fonts['stylea'].border = borders
-    fonts['stylea'].pattern.pattern_fore_colour = 40  #Blue
+    fonts['stylea'].pattern.pattern_fore_colour = 40  # Blue
     fonts['styleb'] = xlwt.easyxf('pattern: pattern solid;')
     fonts['styleb'].border = borders
-    fonts['styleb'].pattern.pattern_fore_colour = 55 #Grey
+    fonts['styleb'].pattern.pattern_fore_colour = 55  # Grey
     fonts['stylec'] = xlwt.easyxf('pattern: pattern solid;')
     fonts['stylec'].border = borders
-    fonts['stylec'].pattern.pattern_fore_colour = 2  #Red
+    fonts['stylec'].pattern.pattern_fore_colour = 2  # Red
     fonts['styled'] = xlwt.easyxf('pattern: pattern solid;')
     fonts['styled'].border = borders
-    fonts['styled'].pattern.pattern_fore_colour = 5  #Yellow
+    fonts['styled'].pattern.pattern_fore_colour = 5  # Yellow
     fonts['stylee'] = xlwt.easyxf('pattern: pattern solid;')
     fonts['stylee'].border = borders
-    fonts['stylee'].pattern.pattern_fore_colour = 19 #BrownyGreen
+    fonts['stylee'].pattern.pattern_fore_colour = 19  # BrownyGreen
     fonts['stylef'] = xlwt.easyxf('pattern: pattern solid;')
     fonts['stylef'].border = borders
-    fonts['stylef'].pattern.pattern_fore_colour = 50  #Green
+    fonts['stylef'].pattern.pattern_fore_colour = 50  # Green
     
     # Determines style to use based on qualifiers
     fonts['qa_none'] = 'style1'
@@ -370,7 +378,7 @@ def get_fonts():
     return fonts
 
 
-def excel_out(data_list, titles_list, desired_filename, multi = False):
+def excel_out(data_list, titles_list, desired_filename, multi=False):
     """
     Outputs data to an Excel file
     :param data_list: a list of station information in 
@@ -402,63 +410,63 @@ def excel_out(data_list, titles_list, desired_filename, multi = False):
     stn_letter = data_list[0]['TC ID'][0]
     stn_name = data_list[0]['Station Name'][0]
     
-    #Prints header to the Excel file
-    if multi == False:
-        ws.write(0,0,"Station Name", fonts_dict['style0'])
-        ws.write(0,2,stn_name, fonts_dict['style1'])
-        ws.write(0,4,"TC ID", fonts_dict['style0'])
-        ws.write(0,5,stn_letter, fonts_dict['style1'])
+    # Prints header to the Excel file
+    if not multi:
+        ws.write(0, 0, "Station Name", fonts_dict['style0'])
+        ws.write(0, 2, stn_name, fonts_dict['style1'])
+        ws.write(0, 4, "TC ID", fonts_dict['style0'])
+        ws.write(0, 5, stn_letter, fonts_dict['style1'])
     else:
-        ws.write(0,0,"Multiple Stations", fonts_dict['style0'])
+        ws.write(0, 0, "Multiple Stations", fonts_dict['style0'])
     
     # Prints qualifier information to Excel file
-    ws.write(0,7,"Qualifiers", fonts_dict['style0'])
-    ws.write(0,8,"Supressed", fonts_dict['stylea'])
-    ws.write(0,9,"Missing", fonts_dict['styleb'])
-    ws.write(0,10,"Error", fonts_dict['stylec'])
-    ws.write(0,11,"Doubtful", fonts_dict['styled'])
-    ws.write(0,12,"Suspect/Warning", fonts_dict['stylee'])
-    ws.write(0,13,"Acceptable/Passed", fonts_dict['stylef'])
+    ws.write(0, 7, "Qualifiers", fonts_dict['style0'])
+    ws.write(0, 8, "Supressed", fonts_dict['stylea'])
+    ws.write(0, 9, "Missing", fonts_dict['styleb'])
+    ws.write(0, 10, "Error", fonts_dict['stylec'])
+    ws.write(0, 11, "Doubtful", fonts_dict['styled'])
+    ws.write(0, 12, "Suspect/Warning", fonts_dict['stylee'])
+    ws.write(0, 13, "Acceptable/Passed", fonts_dict['stylef'])
     
-    #Gets the column to start at for each row
-    starter_location= 0
+    # Gets the column to start at for each row
+    starter_location = 0
     for name_item in data_list[-1]:
-        starter_location+= 1
+        starter_location += 1
         if name_item[0] == "Station Name":
-            if multi==True:
-                starter_location-=2
+            if multi:
+                starter_location -= 2
             break
-    #Prints column titles
+    # Prints column titles
     col_index = 2
     counter = starter_location
-    ws.write(2,0,"Date & Time", fonts_dict['style0'])
-    ws.write(2,1,"", fonts_dict['style0'])
+    ws.write(2, 0, "Date & Time", fonts_dict['style0'])
+    ws.write(2, 1, "", fonts_dict['style0'])
     while counter < data_list[-1].__len__():
         col_title = str(data_list[-1][counter][0])
         col_units = str(data_list[-1][counter][1][1])
-        ws.write(2,col_index,col_title+" ("+col_units+")",fonts_dict['style0'])
-        counter+=1
-        col_index+=1
+        ws.write(2, col_index, col_title+" ("+col_units+")", fonts_dict['style0'])
+        counter += 1
+        col_index += 1
         
     # Starting on this row we write the data to the file
     row_index = 3
-    for hour_line in range(0,data_list.__len__()-1):
+    for hour_line in range(0, data_list.__len__()-1):
         col_index = 2
-        time = str(data_list[hour_line]['date_tm'][0][:16].replace('T',' '))+"Z"
-        ws.write(row_index,0,time,fonts_dict['style1'])
-        ws.write(row_index,1,"",fonts_dict['style1'])
+        time = str(data_list[hour_line]['date_tm'][0][:16].replace('T', ' '))+"Z"
+        ws.write(row_index, 0, time, fonts_dict['style1'])
+        ws.write(row_index, 1, "", fonts_dict['style1'])
         counter = starter_location
         while counter < data_list[-1].__len__():
             try:
                 key = str(data_list[-1][counter][0])
                 datum = str(data_list[hour_line][key][0])
                 qual = str(data_list[hour_line][key][3])
-                ws.write(row_index,col_index,datum,fonts_dict[fonts_dict[qual]])
+                ws.write(row_index, col_index, datum, fonts_dict[fonts_dict[qual]])
             except:
                 pass
-            counter+=1
-            col_index+=1
-        row_index+=1
+            counter += 1
+            col_index += 1
+        row_index += 1
     
     try:
         work_book.save(excel_file)
