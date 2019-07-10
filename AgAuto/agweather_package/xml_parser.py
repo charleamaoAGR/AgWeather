@@ -211,14 +211,35 @@ def parse_mbag_xml(link_base_url_root, strdate, title_dict={}, clean_dict={}, cl
     return total_xml_data, title_list_sorted
 
 
-def parse_single_xml(xml_link, base_children=[]):
-    total_xml_data = []
-
+def get_xml_obj(xml_link):
     try:
         xml_file = urllib2.urlopen(xml_link)
         xml_obj = ElementTree.parse(xml_file)
+
     except urllib2.URLError:
         raise Exception("There is something wrong with the URL. Also, am I connected to the ME?")
+
+    return xml_obj
+
+
+def get_parent_nodes(xml_obj, identifier, attrib_to_search='name', attrib_for_value='value'):
+    xml_tree = xml_obj.getroot().getchildren()
+    desired_nodes = []
+
+    for each_node in xml_tree:
+
+        node_wip = each_node
+        each_attrib = node_wip.attrib.get(attrib_to_search)
+        all_children = node_wip.getchildren()
+        number_of_children = len(all_children)
+
+        while each_attrib != identifier and number_of_children != 0:
+            if each_attrib == identifier:
+                break
+            elif each_attrib != identifier:
+                pass
+        desired_nodes.append(node_wip)
+
 
 def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict={}, clean=False, default_order=500, default_config="mbag"):
     """
@@ -514,9 +535,9 @@ def csv_out(results_list, ordered_titles, filename):
 A collection of examples on how to use these functions
 """
 
-"""
 
 if __name__ == "__main__":
+    """
     # Specify the date in YYYYMMDD format.
     # Here we get the current ZULU date in YYYYMMDD format.
     strdate = datetime.datetime.utcnow().strftime("%Y%m%d")
@@ -531,4 +552,7 @@ if __name__ == "__main__":
     # Example of how to output data to Excel and CSV formats.
     #excel_out(results_list, ordered_titles, "output.xls")
     csv_out(results_list, ordered_titles, "output.csv")
-"""
+    """
+    xml_obj = get_xml_obj('http://dd.weather.gc.ca/observations/xml/MB/yesterday/yesterday_mb_20190710_e.xml')
+    get_parent_nodes(xml_obj, 'station_name')
+
