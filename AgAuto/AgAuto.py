@@ -41,7 +41,7 @@ def user_in():
     while choice != 'q':
         choice = raw_input("Which program do you want to run?:")
 
-        if choice == 'dailyUpload':
+        if choice.strip() == 'dailyUpload' or choice.strip() == '1':
             daily.update_dailyEC()
             file_24 = "mawp24raw.txt"
             file_60 = "mawp60raw.txt"
@@ -55,14 +55,14 @@ def user_in():
             if in_me:
                 call(path.join(getcwd(), 'AgAuto_batch.bat'))
 
-        elif choice == 'mawpCleaner':
+        elif choice.strip() == 'mawpCleaner' or choice.strip() == '2':
             file_24 = "mawp24raw.txt"
             file_60 = "mawp60raw.txt"
             daily.cleanData(file_24)
             daily.cleanData(file_60)
-        elif choice == 'calcPotatoDSV':
+        elif choice.strip() == 'calcPotatoDSV' or choice.strip() == '3':
             potato.show_all_stations_dsv()
-        elif choice == 'debug':
+        elif choice.strip() == 'debug' or choice.strip() == '4':
             debug()
         elif choice not in choices:
             print "Input error. Please pick from list of commands.\n"

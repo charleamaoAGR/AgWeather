@@ -9,10 +9,10 @@ Purpose: PotatoBlight contains the necessary functions to calculate all station 
 Date modified: Fri May 31 2019
 """
 
-from agweather_package import WeatherStation
-from agweather_package import get_path_dir
-from agweather_package import download_txt_request
-from agweather_package import split_text_file
+from UsefulClasses import WeatherStation
+from UsefulFunctions import get_path_dir
+from UsefulFunctions import download_txt_request
+from UsefulFunctions import split_text_file
 from datetime import datetime
 from tqdm import tqdm
 import csv
@@ -31,12 +31,10 @@ def initialize_stations():
     stations_dict = {}
     # We need station_ids as a set because station ids are always unique.
     station_ids = set()
-    # We calculate the size in order to initialize the progress bar.
     size = len(data)
 
-    # Iterate over each line in the text file. We wrape 'data' with tqdm in order to generate a progress bar.
+    # Iterate over each line in the text file. We wrap 'data' with tqdm in order to generate a progress bar.
     for each in tqdm(data, desc="Calculating station DSVs", total=size):
-        # We generate a list of the data by using ',' as the separator.
         data_list = each.strip('\n').split(',')
         # Station ID is the second data point after the date.
         station_id = data_list[1]
@@ -45,13 +43,9 @@ def initialize_stations():
         if station_id != '-7999' and data_list[2] != '-7999' and data_list[3] != '-7999':
             # Check if the WeatherStation object has already been created.
             if station_id not in station_ids:
-                # If first time encountering the station then add it to the set.
                 station_ids.add(station_id)
-                # Create new WeatherStation object using the unique station_id.
                 new_obj = WeatherStation(station_id)
-                # Add the data point to the new object.
                 new_obj.add_data(data_list)
-                # Add the new WeatherStation into the dictionary for later access.
                 stations_dict[station_id] = new_obj
             # If WeatherStation for that station ID has been created then simply add the data to the station's list.
             else:
@@ -91,11 +85,8 @@ def show_all_stations_dsv():
             print "Station %s flagged for invalid data. May have skipped some days for this station." % each.get_id()
         # Calculate the daily dsv and cumulative dsv, and get calculations.
         daily_dsv, cumul_dsv, new_txt = each.today_dsv(datetime.strptime(user_date.strip(), '%Y-%m-%d'))
-        # Add the new calculations to the result string.
         output_txt += new_txt
-        # Write the dsv values into the station_dsv.csv.
         csv_obj.writerow([each.get_id(), cumul_dsv, daily_dsv])
-    # Write the calculations into comparisons.txt
     comparison_file.write(output_txt)
     comparison_file.close()
     csv_file.close()

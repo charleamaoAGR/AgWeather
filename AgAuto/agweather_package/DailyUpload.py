@@ -9,9 +9,9 @@ outlined in the job aid of the same name.
 Date modified: Fri May 31 2019
 """
 
-from agweather_package import xml_parser as parse
-from agweather_package import get_path_dir
-from agweather_package import download_txt_request
+import xml_parser as parse
+from UsefulFunctions import get_path_dir
+from UsefulFunctions import download_txt_request
 from datetime import date, timedelta
 from tqdm import tqdm
 from os import getcwd, path

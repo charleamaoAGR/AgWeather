@@ -19,7 +19,7 @@ import os
 # CONSTANTS
 MAXIMUM_PERIOD_SIZE = 96
 MIN_ALLOWABLE_PERIOD_SIZE = 86
-RH_CUTOFF = 86
+RH_CUTOFF = 86  # change to 86 later
 WISDOM_DSV_CUTOFF = 18
 WISDOM_LOW_TEMP_CUTOFF = 7
 TOMCAST_LOW_TEMP_CUTOFF = 9
@@ -211,19 +211,13 @@ class WeatherStation(Packet):
 
                 # If the data list is empty then create new DailyData object and add new data entry to it.
                 if self.data_size == 0:  # and date_to_hours(date_info) == 12.25:
-                    # Creates and adds new DailyData object.
                     self.add_date(date_info + timedelta(days=1))
-                    # Add data entry to new object.
                     self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)
-                # If the data list has 1 or more DailyData objects.
                 elif self.data_size > 0:
-                    # If the time stamp of the data entry is within the valid range.
                     if self.check_valid_range(self.data[-1].get_earliest_date(), date_info):
-                        # Add data entry to the latest DailyData object.
                         self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)
                     # If time stamp is not within the valid range then assume you have to start a new DailyData object.
                     else:
-                        # If the DailyData object is missing enough data entries then apply warning flag to station.
                         if self.data[-1].period_size <= MIN_ALLOWABLE_PERIOD_SIZE and not self.invalid_data_flag:
                             self.invalid_data_flag = True
                         # Create new DailyData object with new date and add data entry to it.
