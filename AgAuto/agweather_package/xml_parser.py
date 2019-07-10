@@ -211,14 +211,14 @@ def parse_mbag_xml(link_base_url_root, strdate, title_dict={}, clean_dict={}, cl
     return total_xml_data, title_list_sorted
 
 
-def parse_single_xml(xml_link):
+def parse_single_xml(xml_link, base_children=[]):
     total_xml_data = []
 
     try:
         xml_file = urllib2.urlopen(xml_link)
         xml_obj = ElementTree.parse(xml_file)
     except urllib2.URLError:
-        pass
+        raise Exception("There is something wrong with the URL. Also, am I connected to the ME?")
 
 def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict={}, clean=False, default_order=500, default_config="mbag"):
     """
