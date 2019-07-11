@@ -2,13 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e1dd9bc4-bbc1-4e76-831b-fe63b46740b8" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/AgAuto/agweather_package/xml_test.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/AgWeather.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/AgWeather.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/AgAuto/agweather_package/UsefulClasses.py" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/agweather_package/UsefulClasses.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgAuto/input_data/mawp15.txt" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/input_data/mawp15.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgAuto/raw_output_data/comparison.txt" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/raw_output_data/comparison.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgAuto/raw_output_data/station_dsv.csv" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/raw_output_data/station_dsv.csv" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -16,67 +15,13 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FUSProjectUsageTrigger">
-    <session id="-1834643764">
-      <usages-collector id="statistics.lifecycle.project">
-        <counts>
-          <entry key="project.closed" value="1" />
-          <entry key="project.open.time.0" value="1" />
-          <entry key="project.opened" value="1" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.extensions.edit">
-        <counts>
-          <entry key="py" value="727" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.types.edit">
-        <counts>
-          <entry key="Python" value="727" />
-        </counts>
-      </usages-collector>
-    </session>
-  </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+    <leaf>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/AgAuto/AgAuto.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
+            <state relative-caret-position="646">
               <caret line="64" column="62" selection-start-line="64" selection-start-column="62" selection-end-line="64" selection-end-column="62" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/AgAuto/agweather_package/PotatoBlight.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-358">
-              <caret line="26" column="38" selection-start-line="26" selection-start-column="38" selection-end-line="26" selection-end-column="38" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/AgAuto/agweather_package/DailyUpload.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-595">
-              <caret line="302" column="74" selection-start-line="302" selection-start-column="69" selection-end-line="302" selection-end-column="74" />
-              <folding>
-                <element signature="e#235#261#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/AgAuto/agweather_package/UsefulFunctions.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="537">
-              <caret line="176" column="15" lean-forward="true" selection-start-line="176" selection-start-column="15" selection-end-line="176" selection-end-column="15" />
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -84,12 +29,10 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="384">
-              <caret line="239" column="20" lean-forward="true" selection-start-line="239" selection-start-column="20" selection-end-line="239" selection-end-column="20" />
+            <state relative-caret-position="165">
+              <caret line="248" selection-start-line="248" selection-end-line="248" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
-                <marker date="1562796700132" expanded="true" signature="9163:9414" ph="..." />
-                <marker date="1562796700132" expanded="true" signature="9507:10033" ph="..." />
               </folding>
             </state>
           </provider>
@@ -98,8 +41,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/AgAuto/agweather_package/UsefulClasses.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-697">
-              <caret line="93" column="45" lean-forward="true" selection-start-line="93" selection-start-column="45" selection-end-line="93" selection-end-column="45" />
+            <state relative-caret-position="545">
+              <caret line="319" selection-start-line="319" selection-end-line="319" />
             </state>
           </provider>
         </entry>
@@ -109,6 +52,7 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>parse</find>
+      <find>parse_xml_links</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -119,8 +63,8 @@
       <list>
         <option value="$PROJECT_DIR$/AgAuto/AgAuto.py" />
         <option value="$PROJECT_DIR$/AgAuto/agweather_package/DailyUpload.py" />
-        <option value="$PROJECT_DIR$/AgAuto/agweather_package/UsefulClasses.py" />
         <option value="$PROJECT_DIR$/AgAuto/agweather_package/PotatoBlight.py" />
+        <option value="$PROJECT_DIR$/AgAuto/agweather_package/UsefulClasses.py" />
         <option value="$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py" />
       </list>
     </option>
@@ -137,10 +81,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-8" />
-    <option name="y" value="-8" />
-    <option name="width" value="1296" />
-    <option name="height" value="1040" />
+    <option name="x" value="206" />
+    <option name="y" value="126" />
+    <option name="width" value="1026" />
+    <option name="height" value="576" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -257,14 +201,36 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1296" height="1040" extended-state="6" />
+    <frame x="-8" y="-8" width="1382" height="784" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25728154" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26096824" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.3289183" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32872504" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.39938557" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Version Control" order="7" />
+      <window_info anchor="bottom" id="Terminal" order="8" />
+      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
+      <window_info anchor="bottom" id="Python Console" order="10" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="R Graphics" order="3" />
+      <window_info anchor="right" id="R Packages" order="4" weight="0.32980332" />
+    </layout>
+    <layout-to-restore>
+      <window_info content_ui="combo" id="Project" order="0" weight="0.31694403" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.21812595" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -278,10 +244,27 @@
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="R Graphics" order="3" />
       <window_info anchor="right" id="R Packages" order="4" />
-    </layout>
+    </layout-to-restore>
   </component>
-  <component name="VcsContentAnnotationSettings">
-    <option name="myLimit" value="2678400000" />
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py</url>
+          <line>250</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>weather_array</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/AgAuto/README.md">
@@ -289,20 +272,6 @@
         <state split_layout="SPLIT">
           <first_editor />
           <second_editor />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/AgAuto/AgAuto.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="64" column="62" selection-start-line="64" selection-start-column="62" selection-end-line="64" selection-end-column="62" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/AgAuto/agweather_package/UsefulClasses.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-697">
-          <caret line="93" column="45" lean-forward="true" selection-start-line="93" selection-start-column="45" selection-end-line="93" selection-end-column="45" />
         </state>
       </provider>
     </entry>
@@ -333,14 +302,38 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/AgAuto/AgAuto.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="646">
+          <caret line="64" column="62" selection-start-line="64" selection-start-column="62" selection-end-line="64" selection-end-column="62" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AgAuto/agweather_package/xml_test.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-7446" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../CRB_Weather_app/CRB_Weather_app/Project_Directory/packages/CRB_Classes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-206">
+          <caret line="7" column="44" selection-end-line="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AgAuto/agweather_package/UsefulClasses.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="545">
+          <caret line="319" selection-start-line="319" selection-end-line="319" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="384">
-          <caret line="239" column="20" lean-forward="true" selection-start-line="239" selection-start-column="20" selection-end-line="239" selection-end-column="20" />
+        <state relative-caret-position="165">
+          <caret line="248" selection-start-line="248" selection-end-line="248" />
           <folding>
             <element signature="e#0#20#0" expanded="true" />
-            <marker date="1562796700132" expanded="true" signature="9163:9414" ph="..." />
-            <marker date="1562796700132" expanded="true" signature="9507:10033" ph="..." />
           </folding>
         </state>
       </provider>

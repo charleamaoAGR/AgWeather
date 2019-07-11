@@ -2,10 +2,9 @@ import BeautifulSoup
 from operator import itemgetter
 from xml.etree import ElementTree
 import urllib2
-import xlwt
-import copy
 import csv
 from UsefulFunctions import get_path_dir
+from UsefulClasses import GroupedArray
 
 """
 These functions are used to collect SWOB-ML data from the Environment Canada
@@ -16,7 +15,14 @@ See the 'main' section of this file for examples
 
 # urlroot = "http://dd.weather.gc.ca/observations/swob-ml/"
 # urlroot = "http://dd.weather.gc.ca/observations/xml/MB/yesterday/"
-
+MD_IE_PATH = '{http://dms.ec.gc.ca/schema/point-observation/2.1}set/' \
+             '{http://dms.ec.gc.ca/schema/point-observation/2.1}identification-elements'
+R_ELEMENTS_PATH = '{http://dms.ec.gc.ca/schema/point-observation/2.1}elements'
+HOURLY_FIELDS = ['air_temperature', 'humidex', 'wind_speed', 'wind_direction']
+DAILY_FIELDS = ['air_temperature_yesterday_high', 'air_temperature_yesterday_low',
+                'total_precipitation', 'wind_gust_speed',
+                'record_high_temperature', 'record_high_temperature_year',
+                'record_low_temperature', 'record_low_temperature_year']
 
 def get_html_string(url):
     """
@@ -222,23 +228,36 @@ def get_xml_obj(xml_link):
     return xml_obj
 
 
-def get_parent_nodes(xml_obj, identifier, attrib_to_search='name', attrib_for_value='value'):
-    xml_tree = xml_obj.getroot().getchildren()
-    desired_nodes = []
+def get_parent_nodes(xml_obj, identifier):
+    parent_nodes = []
+    for each in xml_obj.getroot().iter(identifier):
+        parent_nodes.append(each)
+    return parent_nodes
 
-    for each_node in xml_tree:
 
-        node_wip = each_node
-        each_attrib = node_wip.attrib.get(attrib_to_search)
-        all_children = node_wip.getchildren()
-        number_of_children = len(all_children)
+def get_weather_data(xml_obj, fields):
+    weather_array = GroupedArray(is_scalar=True)
+    metadata = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}metadata')
+    result = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}result')
+    if len(metadata) != len(result):
+        raise Exception('List of metadata and result are not the same size!')
+    else:
+        list_size = len(metadata)
+        for each_index in range(list_size):
+            meta_contents = metadata[each_index].find(MD_IE_PATH).getchildren()
+            result_contents = result[each_index].find(R_ELEMENTS_PATH).getchildren()
 
-        while each_attrib != identifier and number_of_children != 0:
-            if each_attrib == identifier:
-                break
-            elif each_attrib != identifier:
-                pass
-        desired_nodes.append(node_wip)
+
+    return None
+
+
+def extract_value(element_list, identifier, attrib_to_search='name', attrib_for_value='value'):
+    value = None
+    for each_element in element_list:
+        name = each_element.attrib.get(attrib_to_search)
+        if name == identifier:
+            value = each_element.attrib.get(attrib_for_value)
+    return value
 
 
 def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict={}, clean=False, default_order=500, default_config="mbag"):
@@ -337,169 +356,6 @@ def finalize_titles(ordered_titles):
     return titles
 
 
-def get_fonts():
-    """
-    Here we set up a bunch of fonts for use in Excel formatting
-    :returns: (dict) of font, border, and shading parameters to use with xlwt
-    """
-    borders = xlwt.Borders()
-    borders.left = xlwt.Borders.THIN
-    borders.right = xlwt.Borders.THIN
-    borders.top = xlwt.Borders.THIN
-    
-    # Due to laziness this dictionary is called fonts, but it will also contain
-    # shading and border information 
-    fonts = {}
-    fonts['font0'] = fonts['font1'] = fonts['font2'] = xlwt.Font()
-    fonts['font0'].bold = fonts['font2'].bold = True
-    fonts['font1'].name = fonts['font2'].name = 'Arial'
-    fonts['font0'].name = 'Times New Roman'
-    fonts['font0'].colour_index = 2
-    fonts['font1'] = xlwt.Font()
-    fonts['font1'].name = 'Arial'
-    fonts['font2'] = xlwt.Font()
-    fonts['font2'].name = 'Arial'
-    fonts['font2'].bold = True
-    fonts['style0'] = xlwt.XFStyle()
-    fonts['style0'].border = borders
-    fonts['style2'] = xlwt.XFStyle()
-    fonts['style2'].border = borders
-    fonts['style0'].font = fonts['font0']
-    fonts['style2'].font = fonts['font2']
-    fonts['style1'] = xlwt.easyxf('pattern: pattern solid;')
-    fonts['style1'].border = borders
-    fonts['style1'].font = fonts['font1']
-    fonts['style1'].pattern.pattern_fore_colour = 1
-    fonts['style2'] = xlwt.XFStyle()
-    fonts['style2'].font = fonts['font2']
-    fonts['stylea'] = xlwt.easyxf('pattern: pattern solid;')
-    fonts['stylea'].border = borders
-    fonts['stylea'].pattern.pattern_fore_colour = 40  # Blue
-    fonts['styleb'] = xlwt.easyxf('pattern: pattern solid;')
-    fonts['styleb'].border = borders
-    fonts['styleb'].pattern.pattern_fore_colour = 55  # Grey
-    fonts['stylec'] = xlwt.easyxf('pattern: pattern solid;')
-    fonts['stylec'].border = borders
-    fonts['stylec'].pattern.pattern_fore_colour = 2  # Red
-    fonts['styled'] = xlwt.easyxf('pattern: pattern solid;')
-    fonts['styled'].border = borders
-    fonts['styled'].pattern.pattern_fore_colour = 5  # Yellow
-    fonts['stylee'] = xlwt.easyxf('pattern: pattern solid;')
-    fonts['stylee'].border = borders
-    fonts['stylee'].pattern.pattern_fore_colour = 19  # BrownyGreen
-    fonts['stylef'] = xlwt.easyxf('pattern: pattern solid;')
-    fonts['stylef'].border = borders
-    fonts['stylef'].pattern.pattern_fore_colour = 50  # Green
-    
-    # Determines style to use based on qualifiers
-    fonts['qa_none'] = 'style1'
-    fonts['-10'] = 'stylea'
-    fonts['-1'] = 'styleb'
-    fonts['0'] = 'stylec'
-    fonts['10'] = 'styled'
-    fonts['15'] = 'stylee'
-    fonts['100'] = 'stylef'
-    
-    return fonts
-
-
-def excel_out(data_list, titles_list, desired_filename, multi=False):
-    """
-    Outputs data to an Excel file
-    :param data_list: a list of station information in 
-        [{'fieldx_name':["datum","unit",(int) order,"quality"],'fieldx+1_name':[...]},{...},...] format
-        where each dictionary in the list gets rendered as a row
-    :param titles_list: a list of field title tuples ordered by priority in
-        [("fieldx_name", [(int) priority, "unit"]), ("fieldx+1_name", [(int) priority, "unit"]),...] format
-        where each tuple in the list is used to order the data in results_list and for the header data.
-    :param desired_filename: (str) the name of the file to write the csv to
-    :param multi: (optional bool) True if input is from multiple stations, False (default) otherwise
-    :returns: (bool) True if successful, False otherwise
-    """
-    # Copy data_list so we can make changes
-    data_list = copy.copy(data_list)
-    # Add the titles to the end of the data_list
-    data_list.append(titles_list)
-    
-    # Get the fonts so that we can qualify information by colour
-    fonts_dict = get_fonts()
-    
-    # Open the desired_filename as an Excel file and write over existing
-    excel_file = open(desired_filename, 'wb')
-    
-    # Set up workbook and worksheet (ws)
-    work_book = xlwt.Workbook()
-    ws = work_book.add_sheet('Sheet 1')
-    
-    # Print station ID and Name to top of Excel file
-    stn_letter = data_list[0]['TC ID'][0]
-    stn_name = data_list[0]['Station Name'][0]
-    
-    # Prints header to the Excel file
-    if not multi:
-        ws.write(0, 0, "Station Name", fonts_dict['style0'])
-        ws.write(0, 2, stn_name, fonts_dict['style1'])
-        ws.write(0, 4, "TC ID", fonts_dict['style0'])
-        ws.write(0, 5, stn_letter, fonts_dict['style1'])
-    else:
-        ws.write(0, 0, "Multiple Stations", fonts_dict['style0'])
-    
-    # Prints qualifier information to Excel file
-    ws.write(0, 7, "Qualifiers", fonts_dict['style0'])
-    ws.write(0, 8, "Supressed", fonts_dict['stylea'])
-    ws.write(0, 9, "Missing", fonts_dict['styleb'])
-    ws.write(0, 10, "Error", fonts_dict['stylec'])
-    ws.write(0, 11, "Doubtful", fonts_dict['styled'])
-    ws.write(0, 12, "Suspect/Warning", fonts_dict['stylee'])
-    ws.write(0, 13, "Acceptable/Passed", fonts_dict['stylef'])
-    
-    # Gets the column to start at for each row
-    starter_location = 0
-    for name_item in data_list[-1]:
-        starter_location += 1
-        if name_item[0] == "Station Name":
-            if multi:
-                starter_location -= 2
-            break
-    # Prints column titles
-    col_index = 2
-    counter = starter_location
-    ws.write(2, 0, "Date & Time", fonts_dict['style0'])
-    ws.write(2, 1, "", fonts_dict['style0'])
-    while counter < data_list[-1].__len__():
-        col_title = str(data_list[-1][counter][0])
-        col_units = str(data_list[-1][counter][1][1])
-        ws.write(2, col_index, col_title+" ("+col_units+")", fonts_dict['style0'])
-        counter += 1
-        col_index += 1
-        
-    # Starting on this row we write the data to the file
-    row_index = 3
-    for hour_line in range(0, data_list.__len__()-1):
-        col_index = 2
-        time = str(data_list[hour_line]['date_tm'][0][:16].replace('T', ' '))+"Z"
-        ws.write(row_index, 0, time, fonts_dict['style1'])
-        ws.write(row_index, 1, "", fonts_dict['style1'])
-        counter = starter_location
-        while counter < data_list[-1].__len__():
-            try:
-                key = str(data_list[-1][counter][0])
-                datum = str(data_list[hour_line][key][0])
-                qual = str(data_list[hour_line][key][3])
-                ws.write(row_index, col_index, datum, fonts_dict[fonts_dict[qual]])
-            except:
-                pass
-            counter += 1
-            col_index += 1
-        row_index += 1
-    
-    try:
-        work_book.save(excel_file)
-        return True
-    except:
-        return False
-
-
 def csv_out(results_list, ordered_titles, filename):
     """
     Outputs data to a CSV file
@@ -553,6 +409,8 @@ if __name__ == "__main__":
     #excel_out(results_list, ordered_titles, "output.xls")
     csv_out(results_list, ordered_titles, "output.csv")
     """
-    xml_obj = get_xml_obj('http://dd.weather.gc.ca/observations/xml/MB/yesterday/yesterday_mb_20190710_e.xml')
-    get_parent_nodes(xml_obj, 'station_name')
+    with open('xml_test.xml', 'r') as xml_file:
+        xml_obj = ElementTree.parse(xml_file)
+        get_weather_data(xml_obj, HOURLY_FIELDS)
+
 
