@@ -299,8 +299,16 @@ def extract_value(element_list, identifier, attrib_to_search='name', attrib_for_
     value = None
     for each_element in element_list:
         name = each_element.attrib.get(attrib_to_search)
-        if name == identifier:
+        if name == 'record_high_temperature' and identifier == 'record_high_temperature_year':
+            value = each_element.getchildren()[-1].attrib.get(attrib_for_value)
+            break
+        elif name == 'record_low_temperature' and identifier == 'record_low_temperature_year':
+            value = each_element.getchildren()[-1].attrib.get(attrib_for_value)
+            break
+        elif name == identifier:
             value = each_element.attrib.get(attrib_for_value)
+            break
+
     return value
 
 
@@ -454,22 +462,6 @@ if __name__ == "__main__":
     csv_out(results_list, ordered_titles, "output.csv")
     """
 
-    # all_data = grab_desired_xml_data('hourly')
-    # print all_data
-
-    with open('xml_test', 'r') as xml_file:
-        xml_obj = ElementTree.parse(xml_file)
-        metadata = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}metadata')
-        result = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}result')
-        list_size = len(metadata)
-        for each_index in range(list_size):
-            meta_contents = metadata[each_index].find(MD_IE_PATH).getchildren()
-            result_contents = result[each_index].find(R_ELEMENTS_PATH).getchildren()
-            tc_id = extract_value(meta_contents, 'transport_canada_id')
-            data_entry = [tc_id]
-            for each_field in DAILY_FIELDS:
-                field_value = extract_value(result_contents, each_field)
-                data_entry.append(field_value)
-                if each_field == 'record_high_temperature_year':
-                    print
+    all_data = grab_desired_xml_data('hourly')
+    print all_data
 

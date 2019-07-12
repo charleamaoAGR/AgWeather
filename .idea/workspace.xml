@@ -2,9 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e1dd9bc4-bbc1-4e76-831b-fe63b46740b8" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/AgWeather.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/AgWeather.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -23,12 +20,12 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="1482" />
+          <entry key="py" value="2084" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="1482" />
+          <entry key="Python" value="2084" />
         </counts>
       </usages-collector>
     </session>
@@ -47,11 +44,11 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="398">
-              <caret line="473" column="25" selection-start-line="473" selection-start-column="25" selection-end-line="473" selection-end-column="25" />
+            <state relative-caret-position="228">
+              <caret line="458" column="29" lean-forward="true" selection-start-line="458" selection-start-column="29" selection-end-line="458" selection-end-column="29" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
-                <marker date="1562960743098" expanded="true" signature="12129:12582" ph="..." />
+                <marker date="1562965539854" expanded="true" signature="12129:12582" ph="..." />
               </folding>
             </state>
           </provider>
@@ -268,6 +265,24 @@
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py</url>
+          <line>465</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
   <component name="debuggerHistoryManager">
     <expressions id="evaluateExpression">
       <expression>
@@ -339,11 +354,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="398">
-          <caret line="473" column="25" selection-start-line="473" selection-start-column="25" selection-end-line="473" selection-end-column="25" />
+        <state relative-caret-position="228">
+          <caret line="458" column="29" lean-forward="true" selection-start-line="458" selection-start-column="29" selection-end-line="458" selection-end-column="29" />
           <folding>
             <element signature="e#0#20#0" expanded="true" />
-            <marker date="1562960743098" expanded="true" signature="12129:12582" ph="..." />
+            <marker date="1562965539854" expanded="true" signature="12129:12582" ph="..." />
           </folding>
         </state>
       </provider>
