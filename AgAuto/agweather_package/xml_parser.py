@@ -252,7 +252,11 @@ def update_weather_array(xml_obj, fields, grouped_array):
             meta_contents = metadata[each_index].find(MD_IE_PATH).getchildren()
             result_contents = result[each_index].find(R_ELEMENTS_PATH).getchildren()
             tc_id = extract_value(meta_contents, 'transport_canada_id')
-            data_entry = [tc_id]
+            observation_date = extract_value(meta_contents, 'observation_date_local_time')
+            if observation_date is not None:
+                observation_date = extract_value(
+                    meta_contents, 'observation_date_local_time').replace('.000 CDT', '').replace('T', ' ')
+            data_entry = [observation_date, tc_id]
             for each_field in fields:
                 field_value = extract_value(result_contents, each_field)
                 data_entry.append(field_value)
@@ -310,6 +314,18 @@ def extract_value(element_list, identifier, attrib_to_search='name', attrib_for_
             break
 
     return value
+
+
+def gen_string_rep(data_packet):
+    string_rep = ""
+    for each_entry in data_packet:
+        for each_item in each_entry:
+            string_rep = string_rep + each_item
+            if each_item != each_entry[-1]:
+                string_rep = string_rep + ','
+        string_rep = string_rep + '\n'
+
+    return string_rep
 
 
 def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict={}, clean=False, default_order=500, default_config="mbag"):
@@ -463,5 +479,5 @@ if __name__ == "__main__":
     """
 
     all_data = grab_desired_xml_data('hourly')
-    print all_data
+    print gen_string_rep(all_data.get_data('PBO'))
 
