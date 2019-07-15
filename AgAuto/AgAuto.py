@@ -12,13 +12,11 @@ Date modified: Tue May 21 2019
 
 from agweather_package import PotatoBlight as potato
 from agweather_package import DailyUpload as daily
-from agweather_package import get_path_dir
 from pyfiglet import Figlet
-from tqdm import tqdm
 from subprocess import call
 from os import getcwd, path
 from time import sleep
-import requests
+from agweather_package import xml_parser as parse
 
 """
 Purpose: user_in() serves as the user interface for AgAuto. The function
@@ -70,11 +68,8 @@ def user_in():
 
 
 def debug():
-    in_ME = False
-    while not in_ME:
-        in_ME = daily.in_managed_environment()
-    if in_ME:
-        call(path.join(getcwd(), 'AgAuto_batch.bat'))
+    all_data = parse.grab_desired_xml_data('hourly')
+    print parse.gen_string_rep(all_data.get_data('PBO'))
 
 
 def main():

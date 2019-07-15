@@ -197,3 +197,18 @@ def tomcast_dsv_lookup(period_count, avg_temperature_raw):
         dsv = 4
 
     return dsv
+
+
+def cardinal_to_degrees(cardinal_dir):
+    cardinal_dict = {
+        'N': 0, 'NNE': '22.5', 'NE': 45, 'ENE': 77.5, 'E': 90, 'ESE': 112.5, 'SE': 135, 'SSE': 157.5, 'S': 180,
+        'SSW': 202.5, 'SW': 225, 'WSW': 247.5, 'W': 270, 'WNW': 292.5, 'NW': 315, 'NNW': 337.5
+    }
+
+    try:
+        output = cardinal_dict[cardinal_dir]
+    except KeyError:
+        output = ''
+
+    return output
+
