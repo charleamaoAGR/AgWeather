@@ -5,6 +5,7 @@ import urllib2
 import csv
 from UsefulFunctions import get_path_dir
 from UsefulClasses import GroupedArray
+from tqdm import tqdm
 
 """
 These functions are used to collect SWOB-ML data from the Environment Canada
@@ -23,6 +24,11 @@ DAILY_FIELDS = ['air_temperature_yesterday_high', 'air_temperature_yesterday_low
                 'total_precipitation', 'wind_gust_speed',
                 'record_high_temperature', 'record_high_temperature_year',
                 'record_low_temperature', 'record_low_temperature_year']
+NUMBER_OF_DAILY = 2
+NUMBER_OF_HOURLY = 48
+HOURLY_URL = 'http://dd.weather.gc.ca/observations/xml/MB/hourly/'
+DAILY_URL = 'http://dd.weather.gc.ca/observations/xml/MB/yesterday/'
+
 
 def get_html_string(url):
     """
@@ -235,8 +241,7 @@ def get_parent_nodes(xml_obj, identifier):
     return parent_nodes
 
 
-def get_weather_data(xml_obj, fields):
-    weather_array = GroupedArray(is_scalar=True)
+def update_weather_array(xml_obj, fields, grouped_array):
     metadata = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}metadata')
     result = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}result')
     if len(metadata) != len(result):
@@ -246,18 +251,81 @@ def get_weather_data(xml_obj, fields):
         for each_index in range(list_size):
             meta_contents = metadata[each_index].find(MD_IE_PATH).getchildren()
             result_contents = result[each_index].find(R_ELEMENTS_PATH).getchildren()
+            tc_id = extract_value(meta_contents, 'transport_canada_id')
+            observation_date = extract_value(meta_contents, 'observation_date_local_time')
+            if observation_date is not None:
+                observation_date = extract_value(
+                    meta_contents, 'observation_date_local_time').replace('.000 CDT', '').replace('T', ' ')
+            data_entry = [observation_date, tc_id]
+            for each_field in fields:
+                field_value = extract_value(result_contents, each_field)
+                data_entry.append(field_value)
+            grouped_array.insert_data(tc_id, data_entry)
 
 
-    return None
+def grab_desired_xml_data(daily_or_hourly):
+
+    weather_grouped_array = GroupedArray()
+    if daily_or_hourly == 'daily':
+        xml_url = DAILY_URL
+        fields = DAILY_FIELDS
+        period = 2
+    elif daily_or_hourly == 'hourly':
+        xml_url = HOURLY_URL
+        fields = HOURLY_FIELDS
+        period = 48
+    else:
+        raise Exception('Expected \'daily\' or \'hourly\', got %s instead.' % daily_or_hourly)
+
+    desired_xml_file_names = list_xml_links(xml_url)[-period:]
+    for each_file in tqdm(iterable=desired_xml_file_names, total=period, desc='Downloading %s data' % daily_or_hourly):
+        xml_obj = get_xml_obj(xml_url + '/' + each_file)
+        update_weather_array(xml_obj, fields, weather_grouped_array)
+
+    return weather_grouped_array
+
+
+def list_xml_links(xml_links_url):
+    one_station_html = get_html_string(xml_links_url)
+    one_station_xml_links = []
+    one_station_soup = BeautifulSoup.BeautifulSoup(one_station_html)
+
+    for tag in one_station_soup.findAll('a', href=True):
+        if ".xml" in tag['href']:
+            file_name = tag['href'].encode('ascii', 'ignore')
+            if file_name.split('_')[-1] == 'e.xml':
+                one_station_xml_links.append(file_name)
+
+    return one_station_xml_links
 
 
 def extract_value(element_list, identifier, attrib_to_search='name', attrib_for_value='value'):
     value = None
     for each_element in element_list:
         name = each_element.attrib.get(attrib_to_search)
-        if name == identifier:
+        if name == 'record_high_temperature' and identifier == 'record_high_temperature_year':
+            value = each_element.getchildren()[-1].attrib.get(attrib_for_value)
+            break
+        elif name == 'record_low_temperature' and identifier == 'record_low_temperature_year':
+            value = each_element.getchildren()[-1].attrib.get(attrib_for_value)
+            break
+        elif name == identifier:
             value = each_element.attrib.get(attrib_for_value)
+            break
+
     return value
+
+
+def gen_string_rep(data_packet):
+    string_rep = ""
+    for each_entry in data_packet:
+        for each_item in each_entry:
+            string_rep = string_rep + each_item
+            if each_item != each_entry[-1]:
+                string_rep = string_rep + ','
+        string_rep = string_rep + '\n'
+
+    return string_rep
 
 
 def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict={}, clean=False, default_order=500, default_config="mbag"):
@@ -409,8 +477,7 @@ if __name__ == "__main__":
     #excel_out(results_list, ordered_titles, "output.xls")
     csv_out(results_list, ordered_titles, "output.csv")
     """
-    with open('xml_test.xml', 'r') as xml_file:
-        xml_obj = ElementTree.parse(xml_file)
-        get_weather_data(xml_obj, HOURLY_FIELDS)
 
+    all_data = grab_desired_xml_data('hourly')
+    print gen_string_rep(all_data.get_data('PBO'))
 
