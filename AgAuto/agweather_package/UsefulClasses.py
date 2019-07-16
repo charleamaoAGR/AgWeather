@@ -326,3 +326,19 @@ class GroupedArray:
         return self.identifiers
 
 
+class BatchFile:
+
+    def __init__(self, working_directory):
+        self.working_directory = working_directory
+        self.batch_contents = "cd %s\n" % working_directory
+
+    def insert_command(self, command):
+        self.batch_contents = self.batch_contents + command + '\n'
+
+    def export(self, file_name, folder_path="SELF"):
+        if folder_path == 'SELF':
+            file_path = self.working_directory + '\\' + file_name
+        else:
+            file_path = folder_path + '\\' + file_name
+        with open(file_path, 'w+') as output_batch:
+            output_batch.write(self.batch_contents)
