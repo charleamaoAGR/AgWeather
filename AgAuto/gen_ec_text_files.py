@@ -1,6 +1,7 @@
 from agweather_package import xml_parser as parse
 from agweather_package import get_path_dir
 
+
 def main():
     daily_data_array = parse.grab_desired_xml_data('daily')
     hourly_data_array = parse.grab_desired_xml_data('hourly')

@@ -288,14 +288,15 @@ def grab_desired_xml_data(daily_or_hourly):
         xml_url = DAILY_URL
         fields = DAILY_FIELDS
         period = 2
+        desired_xml_file_names = list_xml_links(xml_url)[-(period + 1):-1]  # Yesterday and the day before yesterday.
     elif daily_or_hourly == 'hourly':
         xml_url = HOURLY_URL
         fields = HOURLY_FIELDS
         period = 48
+        desired_xml_file_names = list_xml_links(xml_url)[-period:]
     else:
         raise Exception('Expected \'daily\' or \'hourly\', got %s instead.' % daily_or_hourly)
 
-    desired_xml_file_names = list_xml_links(xml_url)[-period:]
     for each_file in tqdm(iterable=desired_xml_file_names, total=period, desc='Downloading %s data' % daily_or_hourly):
         xml_obj = get_xml_obj(xml_url + '/' + each_file)
         update_weather_array(xml_obj, fields, weather_grouped_array)
