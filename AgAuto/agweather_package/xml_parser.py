@@ -3,8 +3,10 @@ from operator import itemgetter
 from xml.etree import ElementTree
 import urllib2
 import csv
+import yaml
 from UsefulFunctions import get_path_dir
 from UsefulClasses import GroupedArray
+from UsefulFunctions import cardinal_to_degrees
 from tqdm import tqdm
 
 """
@@ -241,9 +243,22 @@ def get_parent_nodes(xml_obj, identifier):
     return parent_nodes
 
 
+def station_id_dictionary(key='', all_keys=False):
+    output_dict = {}
+    with open(get_path_dir('config_files', 'stations.yaml'), 'r') as station_ids:
+        yaml_load = yaml.safe_load(station_ids)
+        for each_station in yaml_load:
+            if all_keys:
+                output_dict[each_station] = yaml_load[each_station]
+            else:
+                output_dict[each_station] = yaml_load[each_station][key]
+    return output_dict
+
+
 def update_weather_array(xml_obj, fields, grouped_array):
     metadata = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}metadata')
     result = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}result')
+    id_dictionary = station_id_dictionary('mbag_id')
     if len(metadata) != len(result):
         raise Exception('List of metadata and result are not the same size!')
     else:
@@ -252,15 +267,18 @@ def update_weather_array(xml_obj, fields, grouped_array):
             meta_contents = metadata[each_index].find(MD_IE_PATH).getchildren()
             result_contents = result[each_index].find(R_ELEMENTS_PATH).getchildren()
             tc_id = extract_value(meta_contents, 'transport_canada_id')
+            mbag_id = None
             observation_date = extract_value(meta_contents, 'observation_date_local_time')
-            if observation_date is not None:
-                observation_date = extract_value(
-                    meta_contents, 'observation_date_local_time').replace('.000 CDT', '').replace('T', ' ')
-            data_entry = [observation_date, tc_id]
-            for each_field in fields:
-                field_value = extract_value(result_contents, each_field)
-                data_entry.append(field_value)
-            grouped_array.insert_data(tc_id, data_entry)
+            if tc_id in id_dictionary.keys():
+                if observation_date is not None:
+                    observation_date = extract_value(
+                        meta_contents, 'observation_date_local_time').replace('.000 CDT', '').replace('T', ' ')
+                    mbag_id = id_dictionary[tc_id]
+                data_entry = [observation_date, tc_id, mbag_id]
+                for each_field in fields:
+                    field_value = extract_value(result_contents, each_field)
+                    data_entry.append(field_value)
+                grouped_array.insert_data(tc_id, data_entry)
 
 
 def grab_desired_xml_data(daily_or_hourly):
@@ -270,14 +288,15 @@ def grab_desired_xml_data(daily_or_hourly):
         xml_url = DAILY_URL
         fields = DAILY_FIELDS
         period = 2
+        desired_xml_file_names = list_xml_links(xml_url)[-(period + 1):-1]  # Yesterday and the day before yesterday.
     elif daily_or_hourly == 'hourly':
         xml_url = HOURLY_URL
         fields = HOURLY_FIELDS
         period = 48
+        desired_xml_file_names = list_xml_links(xml_url)[-period:]
     else:
         raise Exception('Expected \'daily\' or \'hourly\', got %s instead.' % daily_or_hourly)
 
-    desired_xml_file_names = list_xml_links(xml_url)[-period:]
     for each_file in tqdm(iterable=desired_xml_file_names, total=period, desc='Downloading %s data' % daily_or_hourly):
         xml_obj = get_xml_obj(xml_url + '/' + each_file)
         update_weather_array(xml_obj, fields, weather_grouped_array)
@@ -309,6 +328,9 @@ def extract_value(element_list, identifier, attrib_to_search='name', attrib_for_
         elif name == 'record_low_temperature' and identifier == 'record_low_temperature_year':
             value = each_element.getchildren()[-1].attrib.get(attrib_for_value)
             break
+        elif name == 'wind_direction' and identifier == 'wind_direction':
+            value = cardinal_to_degrees(each_element.attrib.get(attrib_for_value))
+            break
         elif name == identifier:
             value = each_element.attrib.get(attrib_for_value)
             break
@@ -320,7 +342,7 @@ def gen_string_rep(data_packet):
     string_rep = ""
     for each_entry in data_packet:
         for each_item in each_entry:
-            string_rep = string_rep + each_item
+            string_rep = string_rep + str(each_item)
             if each_item != each_entry[-1]:
                 string_rep = string_rep + ','
         string_rep = string_rep + '\n'
@@ -437,7 +459,7 @@ def csv_out(results_list, ordered_titles, filename):
     :returns: (bool) True if successful, False otherwise
     """
     try:
-        # Sanitizes the result information so it only inculdes the value
+        # Sanitizes the result information so it only includes the value
         ordered_results_list = order_results(results_list, ordered_titles)
         # Orders the titles into a string list so it can be added to a csv
         ordered_titles_list = finalize_titles(ordered_titles)
@@ -480,4 +502,6 @@ if __name__ == "__main__":
 
     all_data = grab_desired_xml_data('daily')
     print gen_string_rep(all_data.get_data('PBO'))
+
+    station_id_dictionary()
 
