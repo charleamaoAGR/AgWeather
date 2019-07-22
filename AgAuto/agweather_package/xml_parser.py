@@ -500,7 +500,7 @@ if __name__ == "__main__":
     csv_out(results_list, ordered_titles, "output.csv")
     """
 
-    all_data = grab_desired_xml_data('hourly')
+    all_data = grab_desired_xml_data('daily')
     print gen_string_rep(all_data.get_data('PBO'))
 
     station_id_dictionary()
