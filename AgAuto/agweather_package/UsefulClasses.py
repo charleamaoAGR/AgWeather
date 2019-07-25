@@ -290,8 +290,10 @@ class WeatherStation(Packet):
 
 class GroupedArray:
 
-    def __init__(self, identifiers=[], is_scalar=False):
+    def __init__(self, identifiers=None, is_scalar=False):
         self.data_dict = {}
+        if identifiers is None:
+            identifiers = []
         self.identifiers = identifiers
 
         for each_identifier in identifiers:

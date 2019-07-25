@@ -4,10 +4,6 @@
     <list default="true" id="e1dd9bc4-bbc1-4e76-831b-fe63b46740b8" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/AgWeather.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/AgWeather.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgAuto/AgAuto_batch.bat" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/AgAuto_batch.bat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgAuto/DailyEC.csv" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/DailyEC.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgAuto/raw_output_data/output.csv" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/raw_output_data/output.csv" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -105,7 +101,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../CRB_Weather_app" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../CRB_Weather_app/CRB_Weather_app" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
@@ -218,7 +214,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32718894" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32718894" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39784947" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />

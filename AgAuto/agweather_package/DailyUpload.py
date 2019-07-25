@@ -12,9 +12,10 @@ Date modified: Fri May 31 2019
 import xml_parser as parse
 from UsefulFunctions import get_path_dir
 from UsefulFunctions import download_txt_request
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from tqdm import tqdm
 from os import getcwd, path
+from UsefulClasses import GroupedArray
 import csv
 
 
@@ -22,6 +23,11 @@ urlroot = "http://dd.weather.gc.ca/observations/xml/MB/yesterday/"
 MAXTEMP = 2
 MINTEMP = 3
 PRECIP = 6
+CSV_DATE_INDEX = 2
+CSV_DESC_INDEX = 1
+HEADER_OFFSET_INDEX = 1
+STATION_ID_INDEX = 0
+EARLIEST_DAYS_LIMIT = 25
 
 """
 Purpose: update_dailyEC updates the DailyEC.csv file with new weather station
@@ -416,5 +422,67 @@ def in_managed_environment():
         if choice == 'yes':
             in_ME = False
         else:
-            raise Exception("DailyUpload unsuccesful. Process was terminated.")
+            raise Exception("DailyUpload unsuccessful. Process was terminated.")
     return in_ME
+
+
+def get_empty_dates():
+    dates_to_fill = GroupedArray(is_scalar=True)
+    try:
+        with open('DailyEC.csv', 'r') as csv_file:
+            csv_contents = list(csv.reader(csv_file, delimiter=','))
+            for each_line in csv_contents[HEADER_OFFSET_INDEX:]:
+                date_wip = datetime.strptime(each_line[CSV_DATE_INDEX], '%Y-%m-%d')
+                for index in range(3):
+                    # Check for empty fields.
+                    if each_line[CSV_DATE_INDEX + index].strip() == "" and (datetime.today() - date_wip).days \
+                            < EARLIEST_DAYS_LIMIT:
+                        dates_to_fill.insert_data((each_line[CSV_DATE_INDEX]),
+                                                  each_line[STATION_ID_INDEX][HEADER_OFFSET_INDEX:])
+                        break
+    except IOError:
+        pass
+    return dates_to_fill
+
+
+def updated_daily_ec_data(dates):
+    dates_to_download = dates.get_identifiers()
+    data_filling = GroupedArray()
+    for each_date in tqdm(iterable=dates_to_download, total=len(dates_to_download), desc="Backfilling data"):
+        xml_object = parse.get_xml_obj(parse.generate_daily_xml_link(each_date.replace('-', '')))
+        for each_station in dates.get_data(each_date):
+            temp_high = parse.get_value(xml_object, each_station, 'air_temperature_yesterday_high')
+            temp_low = parse.get_value(xml_object, each_station, 'air_temperature_yesterday_low')
+            precip = parse.get_value(xml_object, each_station, 'total_precipitation')
+            data_filling.insert_data(each_station, [each_date, temp_high, temp_low, precip])
+
+    return data_filling
+
+
+def get_updated_ec_data(date_to_update, station_id, date_grouped_array):
+    value_array = None
+    for each_date in date_grouped_array.get_identifiers():
+        if each_date == date_to_update:
+            updated_stations_data = date_grouped_array.get_data(each_date)
+            for each_row in updated_stations_data:
+                if each_row[0] == station_id:
+                    value_array = each_row
+    return value_array
+
+
+def back_fill_daily_ec():
+    dates = get_empty_dates()
+    date_grouped_array = updated_daily_ec_data(dates)
+    raw_contents_to_write = []
+    if date_grouped_array.size > 1:
+        try:
+            with open('DailyEC.csv', 'r') as csv_file:
+                csv_contents = list(csv.reader(csv_file, delimiter=','))
+                for each_line in csv_contents[1:]:
+                    if each_line[CSV_DATE_INDEX] in date_grouped_array.get_identifiers():
+                        raw_contents_to_write.append([each_line[STATION_ID_INDEX][HEADER_OFFSET_INDEX:],
+                                                      each_line[CSV_DESC_INDEX]].append(
+                            get_updated_ec_data(each_line[])))  # Make simpler with classes
+
+        except IOError:
+            pass

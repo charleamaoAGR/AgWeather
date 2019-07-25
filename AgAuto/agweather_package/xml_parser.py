@@ -255,6 +255,19 @@ def station_id_dictionary(key='', all_keys=False):
     return output_dict
 
 
+def get_value(xml_obj, station, field_name):
+    metadata = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}metadata')
+    result = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}result')
+    value = ''
+    for each_index in range(len(metadata)):
+        meta_contents = metadata[each_index].find(MD_IE_PATH).getchildren()
+        result_contents = result[each_index].find(R_ELEMENTS_PATH).getchildren()
+        tc_id = extract_value(meta_contents, 'transport_canada_id')
+        if tc_id == station:
+            value = extract_value(result_contents, field_name)
+    return value
+
+
 def update_weather_array(xml_obj, fields, grouped_array):
     metadata = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}metadata')
     result = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}result')
@@ -348,6 +361,11 @@ def gen_string_rep(data_packet):
         string_rep = string_rep + '\n'
 
     return string_rep
+
+
+def generate_daily_xml_link(date):
+    url = DAILY_URL + 'yesterday_mb_' + date + '_e.xml'
+    return url
 
 
 def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict={}, clean=False, default_order=500, default_config="mbag"):

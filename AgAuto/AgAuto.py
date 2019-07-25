@@ -68,8 +68,9 @@ def user_in():
 
 
 def debug():
-    all_data = parse.grab_desired_xml_data('hourly')
-    print parse.gen_string_rep(all_data.get_data('PBO'))
+    dates = daily.get_empty_dates()
+    new_data = daily.updated_daily_ec_data(dates)
+    pass
 
 
 def main():
