@@ -11,7 +11,7 @@ Date modified: Fri May 31 2019
 
 from UsefulClasses import WeatherStation
 from UsefulFunctions import get_path_dir
-from UsefulFunctions import download_txt_request
+from UsefulFunctions import download_file
 from UsefulFunctions import split_text_file
 from datetime import datetime
 from tqdm import tqdm
@@ -25,7 +25,7 @@ by station name.
 
 def initialize_stations():
     # Download mawp15.txt into the input_data folder.
-    download_txt_request('https://mbagweather.ca/partners/win/mawp15.txt', 'mawp15.txt')
+    download_file('https://mbagweather.ca/partners/win/mawp15.txt', 'mawp15.txt')
     # We split the text file by '\n' in order to iterate over each line.
     data = split_text_file('mawp15.txt')
     stations_dict = {}

@@ -11,7 +11,7 @@ Date modified: Fri May 31 2019
 
 import xml_parser as parse
 from UsefulFunctions import get_path_dir
-from UsefulFunctions import download_txt_request
+from UsefulFunctions import download_file
 from datetime import date, timedelta, datetime
 from tqdm import tqdm
 from os import getcwd, path
@@ -203,7 +203,7 @@ Parameters:
 def cleanData(filename):
     # Change this later to a more general case. Maybe user input?
     try:
-        download_txt_request('https://mbagweather.ca/partners/mbag' + '//' + filename,  filename, "")
+        download_file('https://mbagweather.ca/partners/mbag' + '//' + filename,  filename, "")
         file_wip = open(filename, "r")
         new_contents = ""
 
@@ -426,14 +426,18 @@ def in_managed_environment():
     return in_ME
 
 
+# Looks at DailyEC.csv and gathers stations and dates with incomplete data.
+# Only looks back up to 25 days before today's date because EC doesn't store data farther than that.
 def get_empty_dates():
     dates_to_fill = GroupedArray(is_scalar=True)
     try:
         with open('DailyEC.csv', 'r') as csv_file:
             csv_contents = list(csv.reader(csv_file, delimiter=','))
+            # HEADER_OFFSET_INDEX is needed so we don't include DailyEC.csv header.
             for each_line in csv_contents[HEADER_OFFSET_INDEX:]:
+                # convert date from each_line into datetime object so we can calculate if within valid range.
                 date_wip = datetime.strptime(each_line[CSV_DATE_INDEX], '%Y-%m-%d')
-                for index in range(3):
+                for index in range(1, 4):
                     # Check for empty fields.
                     if each_line[CSV_DATE_INDEX + index].strip() == "" and (datetime.today() - date_wip).days \
                             < EARLIEST_DAYS_LIMIT:
@@ -445,20 +449,26 @@ def get_empty_dates():
     return dates_to_fill
 
 
+# Looks at dates and stations with incomplete data and downloads the updated data from the EC Websites' XML files.
 def updated_daily_ec_data(dates):
-    dates_to_download = dates.get_identifiers()
+    dates_to_download = dates.get_identifiers()  # Get a list of all the dates with incomplete data.
     data_filling = GroupedArray()
     for each_date in tqdm(iterable=dates_to_download, total=len(dates_to_download), desc="Backfilling data"):
+        # Download the xml file for that date.
         xml_object = parse.get_xml_obj(parse.generate_daily_xml_link(each_date.replace('-', '')))
         for each_station in dates.get_data(each_date):
+            # Parse the xml file for the updated data.
             temp_high = parse.get_value(xml_object, each_station, 'air_temperature_yesterday_high')
             temp_low = parse.get_value(xml_object, each_station, 'air_temperature_yesterday_low')
             precip = parse.get_value(xml_object, each_station, 'total_precipitation')
-            data_filling.insert_data(each_station, [each_date, temp_high, temp_low, precip])
+            # Insert the updated data into data_filling.
+            data_filling.insert_data(each_date, ['C' + each_station, "", each_date, temp_high, temp_low, precip])
 
     return data_filling
 
 
+# If given a date and station ID, and Grouped Array from updated_daily_ec_data it will return the updated values.
+# Will return None if it can't find the data within the Grouped Array.
 def get_updated_ec_data(date_to_update, station_id, date_grouped_array):
     value_array = None
     for each_date in date_grouped_array.get_identifiers():
@@ -470,19 +480,30 @@ def get_updated_ec_data(date_to_update, station_id, date_grouped_array):
     return value_array
 
 
+# Basically copies all data from DailyEC.csv and converts to a list, but replaces incomplete data with updated data.
+# Uses the functions get_empty_dates, updated_daily_ec_data, and get_updated_ec_data to achieve this.
 def back_fill_daily_ec():
     dates = get_empty_dates()
     date_grouped_array = updated_daily_ec_data(dates)
-    raw_contents_to_write = []
+    raw_contents_to_write = [['StationID', 'StationName', 'Date', 'Tmax', 'Tmin', 'Precip']]
     if date_grouped_array.size > 1:
         try:
             with open('DailyEC.csv', 'r') as csv_file:
                 csv_contents = list(csv.reader(csv_file, delimiter=','))
-                for each_line in csv_contents[1:]:
+                for each_line in csv_contents[HEADER_OFFSET_INDEX:]:
                     if each_line[CSV_DATE_INDEX] in date_grouped_array.get_identifiers():
-                        raw_contents_to_write.append([each_line[STATION_ID_INDEX][HEADER_OFFSET_INDEX:],
-                                                      each_line[CSV_DESC_INDEX]].append(
-                            get_updated_ec_data(each_line[])))  # Make simpler with classes
+                        new_data = get_updated_ec_data(
+                            each_line[CSV_DATE_INDEX], each_line[STATION_ID_INDEX], date_grouped_array)
+                        # If it can't find the date/station in date_grouped_array, assume data doesn't need updating.
+                        if new_data is None:
+                            raw_contents_to_write.append(each_line)
+                        else:
+                            new_data[CSV_DESC_INDEX] = each_line[CSV_DESC_INDEX]
+                            raw_contents_to_write.append(new_data)
+                    else:
+                        raw_contents_to_write.append(each_line)
 
         except IOError:
             pass
+
+    return raw_contents_to_write

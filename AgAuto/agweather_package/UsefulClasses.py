@@ -10,16 +10,13 @@ Date modified: Fri May 31 2019
 """
 
 from datetime import datetime, timedelta
-from UsefulFunctions import get_path_dir
-from UsefulFunctions import date_to_hours
 from UsefulFunctions import wisdom_dsv_lookup
 from UsefulFunctions import tomcast_dsv_lookup
-import os
 
 # CONSTANTS
 MAXIMUM_PERIOD_SIZE = 96
 MIN_ALLOWABLE_PERIOD_SIZE = 86
-RH_CUTOFF = 86  # change to 86 later
+RH_CUTOFF = 86
 WISDOM_DSV_CUTOFF = 18
 WISDOM_LOW_TEMP_CUTOFF = 7
 TOMCAST_LOW_TEMP_CUTOFF = 9
@@ -288,14 +285,18 @@ class WeatherStation(Packet):
         return new_date <= daily_date_reset
 
 
+# An extension of the standard Python dictionary.
+# Allows you to maintain a list for every dictionary key. Useful for organizing different keys that store similar data.
 class GroupedArray:
 
     def __init__(self, identifiers=None, is_scalar=False):
         self.data_dict = {}
+        # If no identifiers is specified then just initialize an empty list.
         if identifiers is None:
             identifiers = []
         self.identifiers = identifiers
 
+        # Initialize an empty list for each key in identifiers.
         for each_identifier in identifiers:
             self.data_dict[each_identifier] = []
 

@@ -16,8 +16,7 @@ Datastore.  The data can be organized into CSV and Excel formats using the funct
 See the 'main' section of this file for examples
 """
 
-# urlroot = "http://dd.weather.gc.ca/observations/swob-ml/"
-# urlroot = "http://dd.weather.gc.ca/observations/xml/MB/yesterday/"
+
 MD_IE_PATH = '{http://dms.ec.gc.ca/schema/point-observation/2.1}set/' \
              '{http://dms.ec.gc.ca/schema/point-observation/2.1}identification-elements'
 R_ELEMENTS_PATH = '{http://dms.ec.gc.ca/schema/point-observation/2.1}elements'
@@ -225,6 +224,7 @@ def parse_mbag_xml(link_base_url_root, strdate, title_dict={}, clean_dict={}, cl
     return total_xml_data, title_list_sorted
 
 
+# Parses the xml file downloaded from xml_link into an ElementTree object and returns it.
 def get_xml_obj(xml_link):
     try:
         xml_file = urllib2.urlopen(xml_link)
@@ -236,6 +236,7 @@ def get_xml_obj(xml_link):
     return xml_obj
 
 
+# Gets all nodes with the 'name' specified by identifier.
 def get_parent_nodes(xml_obj, identifier):
     parent_nodes = []
     for each in xml_obj.getroot().iter(identifier):
@@ -243,13 +244,16 @@ def get_parent_nodes(xml_obj, identifier):
     return parent_nodes
 
 
+# Returns a dictionary of all EC stations with corresponding data from stations.yaml.
 def station_id_dictionary(key='', all_keys=False):
     output_dict = {}
     with open(get_path_dir('config_files', 'stations.yaml'), 'r') as station_ids:
         yaml_load = yaml.safe_load(station_ids)
         for each_station in yaml_load:
+            # If all_keys == True then it stores all data for that station from stations.yaml.
             if all_keys:
                 output_dict[each_station] = yaml_load[each_station]
+            # Otherwise it just stores a specific value.
             else:
                 output_dict[each_station] = yaml_load[each_station][key]
     return output_dict

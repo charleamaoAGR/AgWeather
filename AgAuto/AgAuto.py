@@ -16,7 +16,7 @@ from pyfiglet import Figlet
 from subprocess import call
 from os import getcwd, path
 from time import sleep
-from agweather_package import xml_parser as parse
+from agweather_package import write_list_to_csv
 
 """
 Purpose: user_in() serves as the user interface for AgAuto. The function
@@ -40,6 +40,9 @@ def user_in():
         choice = raw_input("Which program do you want to run?:")
 
         if choice.strip() == 'dailyUpload' or choice.strip() == '1':
+            contents_to_write = daily.back_fill_daily_ec()
+            if len(contents_to_write) > 1:
+                write_list_to_csv('DailyEC.csv', contents_to_write)
             daily.update_dailyEC()
             file_24 = "mawp24raw.txt"
             file_60 = "mawp60raw.txt"
@@ -68,14 +71,11 @@ def user_in():
 
 
 def debug():
-    dates = daily.get_empty_dates()
-    new_data = daily.updated_daily_ec_data(dates)
     pass
 
 
 def main():
     # update_dailyEC()
     user_in()
-    
 
 main()

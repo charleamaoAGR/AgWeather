@@ -1,6 +1,5 @@
 import os
 import csv
-import urllib2
 import requests
 from tqdm import tqdm
 
@@ -36,41 +35,17 @@ def get_path_dir(directory, file_name, create=True):
     return file_path
 
 
-def download_data(url, local_data=False):
-
-    if local_data:
-        with open(get_path_dir('raw_output_data', 'mawp_15_test.txt'), 'r') as text_file:
-            data = text_file.read().split('\n')[1:-1]
-    else:
-        response = urllib2.urlopen(url)
-        data = response.read().split('\n')[1:-1]
-
-    return data
-
-
-"""
-Purpose: download_txt_request's role is to download any file with 
-"""
-
-
-def download_txt_request(url, file_name, default_folder='input_data'):
-
+# Downloads a file if given a url and file_name and stores it in the local PC.
+def download_file(url, file_name, default_folder='input_data'):
+    # Get the response from URL.
     with requests.get(url, stream=True) as r:
-        chunkSize = 1024
+        chunkSize = 1024  # Download 1024 bytes at a time.
         with open(get_path_dir(default_folder, file_name), 'wb') as raw_file:
             for chunk in tqdm(iterable=r.iter_content(chunk_size=chunkSize), total=int(r.headers['Content-Length']) / chunkSize, unit='KB', desc="Downloading %s" %file_name):
                 raw_file.write(chunk)
 
 
-def download_grib_request(url, file_name, default_folder='input_data'):
-
-    with requests.get(url, stream=True) as r:
-        chunkSize = 1024
-        with open(get_path_dir(default_folder, file_name), 'wb') as raw_file:
-            for chunk in tqdm(iterable=r.iter_content(chunk_size=chunkSize), unit='KB', desc="Downloading %s" %file_name):
-                raw_file.write(chunk)
-
-
+# Takes a text file and returns a list of each line.
 def split_text_file(file_name, default_folder='input_data', start_index=1, end_index=-1):
 
     raw_file = open(get_path_dir(default_folder, file_name), 'r')
@@ -80,19 +55,11 @@ def split_text_file(file_name, default_folder='input_data', start_index=1, end_i
     return output_text
 
 
-def convert_input_csv(csv_file_name, output_file_name, input_folder='input_data', output_folder='raw_output_data'):
-    with open(get_path_dir(input_folder, csv_file_name), 'r') as potato_csv:
-        contents = list(csv.reader(potato_csv, delimiter=','))
-        output_file = open(get_path_dir(output_folder, output_file_name), 'w+')
-        for each_line in contents:
-            output_file.write("%s\n" % ','.join(each_line))
-        output_file.close()
-
-
 def date_to_hours(date_var):
     return date_var.hour + date_var.minute/60.0
 
 
+# Returns DSV if given number of periods that RH >= 86 and temperature > 7 C based on the Wisdom table.
 def wisdom_dsv_lookup(period_count, avg_temperature_raw):
 
     if avg_temperature_raw > 7.0:
@@ -133,6 +100,7 @@ def wisdom_dsv_lookup(period_count, avg_temperature_raw):
     return dsv
 
 
+# Returns DSV if given number of periods that RH >= 86 and temperature > 7 C based on the Tomcast table.
 def tomcast_dsv_lookup(period_count, avg_temperature_raw):
 
     if avg_temperature_raw > 9.0:
@@ -199,6 +167,8 @@ def tomcast_dsv_lookup(period_count, avg_temperature_raw):
     return dsv
 
 
+# If given a string representing the cardinal direction, will return equivalent direction in degrees.
+# Angle is measured clockwise from the northern direction.
 def cardinal_to_degrees(cardinal_dir):
     cardinal_dict = {
         'N': 0, 'NNE': 22.5, 'NE': 45, 'ENE': 77.5, 'E': 90, 'ESE': 112.5, 'SE': 135, 'SSE': 157.5, 'S': 180,
@@ -212,3 +182,9 @@ def cardinal_to_degrees(cardinal_dir):
 
     return output
 
+
+def write_list_to_csv(file_name, contents_list):
+    with open(file_name, 'wb') as csv_file:
+        daily_ec = csv.writer(csv_file, delimiter=',')
+        for each_row in contents_list:
+            daily_ec.writerow(each_row)
