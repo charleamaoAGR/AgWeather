@@ -184,7 +184,7 @@ def cardinal_to_degrees(cardinal_dir):
 
 
 def write_list_to_csv(file_name, contents_list):
-    with open(file_name, 'wb') as csv_file:
+    with open(file_name, 'w', newline='') as csv_file:
         daily_ec = csv.writer(csv_file, delimiter=',')
         for each_row in contents_list:
             daily_ec.writerow(each_row)

@@ -9,13 +9,13 @@ outlined in the job aid of the same name.
 Date modified: Fri May 31 2019
 """
 
-import xml_parser as parse
-from UsefulFunctions import get_path_dir
-from UsefulFunctions import download_file
+from .xml_parser import*
+from .UsefulFunctions import get_path_dir
+from .UsefulFunctions import download_file
 from datetime import date, timedelta, datetime
 from tqdm import tqdm
 from os import getcwd, path
-from UsefulClasses import GroupedArray
+from .UsefulClasses import GroupedArray
 import csv
 
 
@@ -58,7 +58,7 @@ def update_dailyEC(default_file="DailyEC.csv"):
         daily_contents = list(csv.reader(daily_csv, delimiter=','))
         daily_csv.close()
     except IOError:
-        print "No DailyEC.csv found. Creating new csv file and appending."
+        print("No DailyEC.csv found. Creating new csv file and appending.")
 
     # If daily_contents contains data other than the headers, then insert summary data under the right locations.
     if len(daily_contents) > 1:
@@ -103,11 +103,11 @@ def dict_summary(csv_file):
 
         if check_station(station_id, get_EC_station_ids(need_alternative=True)):
             if (max_temp == "" or min_temp == "" or precip == "") and station_id != "" and station_id != "WPO":
-                print "Empty fields exist for station ID: %s. Please review Daily EC" % station_id
+                print("Empty fields exist for station ID: %s. Please review Daily EC" % station_id)
             if precip.strip() == "Trace":
                 precip = "0"
-                print "Precipitation for %s was found to be 'Trace'. Check with Frodo and review Daily EC. " % station_id
-                print "Setting precipitation as an empty field for %s." % station_id
+                print("Precipitation for %s was found to be 'Trace'. Check with Frodo and review Daily EC. " % station_id)
+                print("Setting precipitation as an empty field for %s." % station_id)
 
         summary_dict[station_id] = [max_temp, min_temp, precip]
 
@@ -145,7 +145,7 @@ def get_correct_data(station_id, summary_dict, str_date):
         else:
             correct_data = summary_dict[station_id]
     except KeyError:
-        print "KeyError for %s. No data was found at this station for %s." % (station_id, str_date)
+        print("KeyError for %s. No data was found at this station for %s." % (station_id, str_date))
 
     return correct_data
 
@@ -227,7 +227,7 @@ def cleanData(filename):
         file_wip.close()
 
     except IOError:
-        print "mawp24raw.txt or mawp60raw.txt were not found. Please check directory."
+        print("mawp24raw.txt or mawp60raw.txt were not found. Please check directory.")
 
 
 """
@@ -308,11 +308,11 @@ def getUpdatedDailyData(urlroot, strdate_dash, daily_contents, updated_daily_con
 
     # Convert pure_date into string format without dashes for use in parse_station.
     strdate = pure_date.strftime("%Y%m%d")
-    clean_dict, clean = parse.clean_incoming("fields.txt")
+    clean_dict, clean = clean_incoming("fields.txt")
 
     # results_list and ordered_titles contain the data parsed from the xml files from the data mart.
-    results_list, ordered_titles = parse.parse_station(urlroot, strdate, "default", clean_dict=clean_dict, clean=clean)
-    parse.csv_out(results_list, ordered_titles, "output.csv")
+    results_list, ordered_titles = parse_station(urlroot, strdate, "default", clean_dict=clean_dict, clean=clean)
+    csv_out(results_list, ordered_titles, "output.csv")
 
     # Get the list of desired stations from the stations.txt file.
     stations = get_EC_stations()
@@ -408,16 +408,16 @@ def gen_Bat_file():
     # Replaces all instances of FILE_PATH with the path to the 'input_data' folder.
     bat_skeleton = bat_skeleton.replace('FILE_PATH', getcwd())
 
-    with open('AgAuto_batch.bat', 'wb') as bat_file:
+    with open('AgAuto_batch.bat', 'w') as bat_file:
         bat_file.write(bat_skeleton)
 
 
 def in_managed_environment():
     if path.exists(r'\\MBPApp0964P\Shared_Data\AgWeather\upload'):
         in_ME = True
-        print 'Successfully connected to managed environment. Will copy files now.'
+        print('Successfully connected to managed environment. Will copy files now.')
     else:
-        choice = raw_input('Could not connect to managed environment, likely ethernet is not plugged in. Try again? '
+        choice = input('Could not connect to managed environment, likely ethernet is not plugged in. Try again? '
                            '(yes/no):')
         if choice == 'yes':
             in_ME = False
@@ -455,12 +455,12 @@ def updated_daily_ec_data(dates):
     data_filling = GroupedArray()
     for each_date in tqdm(iterable=dates_to_download, total=len(dates_to_download), desc="Backfilling data"):
         # Download the xml file for that date.
-        xml_object = parse.get_xml_obj(parse.generate_daily_xml_link(each_date.replace('-', '')))
+        xml_object = get_xml_obj(generate_daily_xml_link(each_date.replace('-', '')))
         for each_station in dates.get_data(each_date):
             # Parse the xml file for the updated data.
-            temp_high = parse.get_value(xml_object, each_station, 'air_temperature_yesterday_high')
-            temp_low = parse.get_value(xml_object, each_station, 'air_temperature_yesterday_low')
-            precip = parse.get_value(xml_object, each_station, 'total_precipitation')
+            temp_high = get_value(xml_object, each_station, 'air_temperature_yesterday_high')
+            temp_low = get_value(xml_object, each_station, 'air_temperature_yesterday_low')
+            precip = get_value(xml_object, each_station, 'total_precipitation')
             # Insert the updated data into data_filling.
             data_filling.insert_data(each_date, ['C' + each_station, "", each_date, temp_high, temp_low, precip])
 

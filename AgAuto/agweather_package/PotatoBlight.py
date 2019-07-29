@@ -9,10 +9,10 @@ Purpose: PotatoBlight contains the necessary functions to calculate all station 
 Date modified: Fri May 31 2019
 """
 
-from UsefulClasses import WeatherStation
-from UsefulFunctions import get_path_dir
-from UsefulFunctions import download_file
-from UsefulFunctions import split_text_file
+from .UsefulClasses import WeatherStation
+from .UsefulFunctions import get_path_dir
+from .UsefulFunctions import download_file
+from .UsefulFunctions import split_text_file
 from datetime import datetime
 from tqdm import tqdm
 import csv
@@ -62,7 +62,7 @@ based on a specified seed date of the format YYYY-MM-DD.
 
 
 def show_all_stations_dsv():
-    user_date = raw_input("\nPlease specify a \"seed\" date (YYYY-MM-DD):")
+    user_date = input("\nPlease specify a \"seed\" date (YYYY-MM-DD):")
 
     # Use initialize_stations to get us the dictionary of WeatherStation objects.
     stations = initialize_stations()
@@ -82,7 +82,7 @@ def show_all_stations_dsv():
     for each in stations.values():
         # If WeatherStation.invalid_data_flag is True then warn the user.
         if each.invalid_data_flag:
-            print "Station %s flagged for invalid data. May have skipped some days for this station." % each.get_id()
+            print("Station %s flagged for invalid data. May have skipped some days for this station." % each.get_id())
         # Calculate the daily dsv and cumulative dsv, and get calculations.
         daily_dsv, cumul_dsv, new_txt = each.today_dsv(datetime.strptime(user_date.strip(), '%Y-%m-%d'))
         output_txt += new_txt

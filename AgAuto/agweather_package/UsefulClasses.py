@@ -10,8 +10,8 @@ Date modified: Fri May 31 2019
 """
 
 from datetime import datetime, timedelta
-from UsefulFunctions import wisdom_dsv_lookup
-from UsefulFunctions import tomcast_dsv_lookup
+from .UsefulFunctions import wisdom_dsv_lookup
+from .UsefulFunctions import tomcast_dsv_lookup
 
 # CONSTANTS
 MAXIMUM_PERIOD_SIZE = 96
@@ -222,7 +222,7 @@ class WeatherStation(Packet):
                         self.data[-1].add_data(date_info, temp, RH, rain, avg_ws, avg_wd)  # Add 12:15 PM data
 
             except ValueError:
-                print "Station data is invalid for %s. Skipping data entry for this time period." % self.id
+                print("Station data is invalid for %s. Skipping data entry for this time period." % self.id)
 
     def add_date(self, date_info):
         new_day = DailyData(date_info)
