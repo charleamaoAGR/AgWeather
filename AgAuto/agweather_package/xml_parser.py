@@ -1,12 +1,12 @@
-import BeautifulSoup
+from bs4 import BeautifulSoup
 from operator import itemgetter
 from xml.etree import ElementTree
-import urllib2
+import urllib.request
 import csv
 import yaml
-from UsefulFunctions import get_path_dir
-from UsefulClasses import GroupedArray
-from UsefulFunctions import cardinal_to_degrees
+from .UsefulFunctions import get_path_dir
+from .UsefulClasses import GroupedArray
+from .UsefulFunctions import cardinal_to_degrees
 from tqdm import tqdm
 
 """
@@ -40,19 +40,19 @@ def get_html_string(url):
     catcher = 0
     while catcher < 3:
         try:
-            URLObj = urllib2.urlopen(url)
+            URLObj = urllib.request.urlopen(url)
             html_string = URLObj.read().decode('utf-8')
             catcher = 3
             return html_string
         except:
-            print "Link retrieval error on:"
-            print url
+            print("Link retrieval error on:")
+            print(url)
             html_string = ""
             catcher += 1
             if catcher == 3:
                 return html_string
             else:
-                print "Trying again"
+                print("Trying again")
 
 
 def get_stations_list(urlroot, strdate):
@@ -64,7 +64,7 @@ def get_stations_list(urlroot, strdate):
     """
     all_stations_list = []
     all_stations_html = get_html_string(urlroot+strdate+"/")
-    all_stations_soup = BeautifulSoup.BeautifulSoup(all_stations_html)
+    all_stations_soup = BeautifulSoup(all_stations_html, features="html5lib")
 
     for tag in all_stations_soup.findAll('a', href=True):
         # length is 5: eg. "CVSL/", we remove the "/" to get station name
@@ -94,7 +94,7 @@ def clean_incoming(clean_info_filename="in.txt", default_order=500):
     """
     try:
         clean_info = {}
-        clean_info_file_obj = file(get_path_dir("config_files", clean_info_filename), 'rb')
+        clean_info_file_obj = open(get_path_dir("config_files", clean_info_filename), 'r')
         split = csv.reader(clean_info_file_obj, delimiter=',', skipinitialspace=True)
         for line_data_list in split:
             if line_data_list.__len__() <= 3:
@@ -107,10 +107,11 @@ def clean_incoming(clean_info_filename="in.txt", default_order=500):
                 # clean_info["lat"]     = ["lat", -120]
                 # clean_info["long"]    = ["long", -120]
                 # clean_info["msc/observation/atmospheric/surface_weather/ca-1.0-ascii"]=["mscschema", -100]
+        clean_info_file_obj.close()
     except:
         clean = False
         if clean_info_filename != "OFF":
-            print "Can't read file passed to clean_incoming()"
+            print("Can't read file passed to clean_incoming()")
     
     return clean_info, clean
 
@@ -139,12 +140,12 @@ def parse_xml_links(link_base_url_root, xml_links, title_dict={}, clean_dict={},
         while catcher < 3:
             try:
                 # maybe use xml_file as a local file so you don't have to connect to phone wifi.
-                xml_file = urllib2.urlopen(link_base_url_root + xml_address)
+                xml_file = urllib.request.urlopen(link_base_url_root + xml_address)
                 xml_parser_obj = ElementTree.parse(xml_file)
                 catcher = 3
             except:
                 catcher += 1
-                print "Error opening xmladdress" + xml_address
+                print("Error opening xmladdress" + xml_address)
                 
             lastname = ""
             single_xml_data = {}
@@ -152,7 +153,7 @@ def parse_xml_links(link_base_url_root, xml_links, title_dict={}, clean_dict={},
             for node in el_tree:
                 name = node.attrib.get('name')
                 value = node.attrib.get('value')
-                uom = unicode(node.attrib.get('uom')).encode('ascii', 'ignore')
+                uom = node.attrib.get('uom').encode('ascii', 'ignore')  # used to be wrapped by unicode()
                 order = int(default_order)
                 qual = "qa_none"
 
@@ -185,12 +186,12 @@ def parse_mbag_xml(link_base_url_root, strdate, title_dict={}, clean_dict={}, cl
     while catcher < 3:
         try:
             # maybe use xml_file as a local file so you don't have to connect to phone wifi.
-            xml_file = urllib2.urlopen(link_base_url_root + xml_address)
+            xml_file = urllib.request.urlopen(link_base_url_root + xml_address)
             xml_parser_obj = ElementTree.parse(xml_file)
             catcher = 3
         except:
             catcher += 1
-            print "Error opening xmladdress" + xml_address
+            print("Error opening xmladdress" + xml_address)
 
         el_tree = xml_parser_obj.getroot().getchildren()
         for node in el_tree:
@@ -202,7 +203,7 @@ def parse_mbag_xml(link_base_url_root, strdate, title_dict={}, clean_dict={}, cl
                 for each_element in each_node.getchildren():
                     name = each_element.attrib.get('name')
                     value = each_element.attrib.get('value')
-                    uom = unicode(each_element.attrib.get('uom')).encode('ascii', 'ignore')
+                    uom = each_element.attrib.get('uom').encode('ascii', 'ignore')
                     order = int(default_order)
                     qual = "qa_none"
 
@@ -219,7 +220,7 @@ def parse_mbag_xml(link_base_url_root, strdate, title_dict={}, clean_dict={}, cl
             single_xml_copy = dict(single_xml_data)
             total_xml_data.append(single_xml_copy)
 
-        title_list_sorted = sorted(title_dict.iteritems(), key=itemgetter(1), reverse=False)
+        title_list_sorted = sorted(list(title_dict.items()), key=itemgetter(1), reverse=False)
 
     return total_xml_data, title_list_sorted
 
@@ -227,10 +228,10 @@ def parse_mbag_xml(link_base_url_root, strdate, title_dict={}, clean_dict={}, cl
 # Parses the xml file downloaded from xml_link into an ElementTree object and returns it.
 def get_xml_obj(xml_link):
     try:
-        xml_file = urllib2.urlopen(xml_link)
+        xml_file = urllib.request.urlopen(xml_link)
         xml_obj = ElementTree.parse(xml_file)
 
-    except urllib2.URLError:
+    except urllib.request.URLError:
         raise Exception("There is something wrong with the URL. Also, am I connected to the ME?")
 
     return xml_obj
@@ -253,17 +254,20 @@ def station_id_dictionary(key='', all_keys=False):
             # If all_keys == True then it stores all data for that station from stations.yaml.
             if all_keys:
                 output_dict[each_station] = yaml_load[each_station]
-            # Otherwise it just stores a specific value.
+            # Otherwise it just stores a specific value into output_dict.
             else:
                 output_dict[each_station] = yaml_load[each_station][key]
     return output_dict
 
 
+# Gets the value of a field when given an ElementTree object (xml_obj) and a station name.
 def get_value(xml_obj, station, field_name):
     metadata = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}metadata')
     result = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}result')
     value = ''
     for each_index in range(len(metadata)):
+        # Get Identification elements from metadata. Identification elements stores the transport_canada_id.
+        # Look inside one of the xml files from http://dd.weather.gc.ca/observations/xml/MB/yesterday/ to understand.
         meta_contents = metadata[each_index].find(MD_IE_PATH).getchildren()
         result_contents = result[each_index].find(R_ELEMENTS_PATH).getchildren()
         tc_id = extract_value(meta_contents, 'transport_canada_id')
@@ -324,11 +328,11 @@ def grab_desired_xml_data(daily_or_hourly):
 def list_xml_links(xml_links_url):
     one_station_html = get_html_string(xml_links_url)
     one_station_xml_links = []
-    one_station_soup = BeautifulSoup.BeautifulSoup(one_station_html)
+    one_station_soup = BeautifulSoup(one_station_html, features="html5lib")
 
     for tag in one_station_soup.findAll('a', href=True):
         if ".xml" in tag['href']:
-            file_name = tag['href'].encode('ascii', 'ignore')
+            file_name = str(tag['href'].encode('ascii', 'ignore'), "utf-8")
             if file_name.split('_')[-1] == 'e.xml':
                 one_station_xml_links.append(file_name)
 
@@ -401,7 +405,7 @@ def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict
 
     one_station_html = get_html_string(one_station_url)
     one_station_xml_links = []
-    one_station_soup = BeautifulSoup.BeautifulSoup(one_station_html)
+    one_station_soup = BeautifulSoup(one_station_html, features="html5lib")
     
     for tag in one_station_soup.findAll('a', href=True):
         if ".xml" in tag['href']:
@@ -487,7 +491,7 @@ def csv_out(results_list, ordered_titles, filename):
         ordered_titles_list = finalize_titles(ordered_titles)
         
         # Write the header and data to the csv file
-        with open(get_path_dir('raw_output_data', filename), "wb") as f:
+        with open(get_path_dir('raw_output_data', filename), "w", newline='') as f:
             writer = csv.writer(f)
             writer.writerow(ordered_titles_list)
             writer.writerows(ordered_results_list)
@@ -523,7 +527,7 @@ if __name__ == "__main__":
     """
 
     all_data = grab_desired_xml_data('daily')
-    print gen_string_rep(all_data.get_data('PBO'))
+    print(gen_string_rep(all_data.get_data('PBO')))
 
     station_id_dictionary()
 
