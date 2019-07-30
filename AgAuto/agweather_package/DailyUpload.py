@@ -203,7 +203,7 @@ Parameters:
 def cleanData(filename):
     # Change this later to a more general case. Maybe user input?
     try:
-        download_file('https://mbagweather.ca/partners/mbag' + '//' + filename,  filename, "")
+        download_file('https://mbagweather.ca/partners/mbag' + '/' + filename,  filename, "")
         file_wip = open(filename, "r")
         new_contents = ""
 
@@ -226,7 +226,8 @@ def cleanData(filename):
         file_wip.write(new_contents)
         file_wip.close()
 
-    except IOError:
+    except IOError as io:
+        print(io)
         print("mawp24raw.txt or mawp60raw.txt were not found. Please check directory.")
 
 
