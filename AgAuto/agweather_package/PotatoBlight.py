@@ -72,7 +72,7 @@ def show_all_stations_dsv():
     output_txt = ""
 
     # Create/overwrite the station_dsv.csv file.
-    csv_file = open(get_path_dir('raw_output_data', 'station_dsv.csv'), 'wb')
+    csv_file = open(get_path_dir('raw_output_data', 'station_dsv.csv'), 'w', newline='')
 
     csv_obj = csv.writer(csv_file, delimiter=',')
 

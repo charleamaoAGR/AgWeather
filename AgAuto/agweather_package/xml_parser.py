@@ -64,7 +64,7 @@ def get_stations_list(urlroot, strdate):
     """
     all_stations_list = []
     all_stations_html = get_html_string(urlroot+strdate+"/")
-    all_stations_soup = BeautifulSoup.BeautifulSoup(all_stations_html)
+    all_stations_soup = BeautifulSoup(all_stations_html, features="html5lib")
 
     for tag in all_stations_soup.findAll('a', href=True):
         # length is 5: eg. "CVSL/", we remove the "/" to get station name
@@ -94,9 +94,8 @@ def clean_incoming(clean_info_filename="in.txt", default_order=500):
     """
     try:
         clean_info = {}
-        clean_info_file_obj = open(get_path_dir("config_files", clean_info_filename), 'rb')
+        clean_info_file_obj = open(get_path_dir("config_files", clean_info_filename), 'r')
         split = csv.reader(clean_info_file_obj, delimiter=',', skipinitialspace=True)
-        clean_info_file_obj.close()
         for line_data_list in split:
             if line_data_list.__len__() <= 3:
                 clean = True
@@ -108,6 +107,7 @@ def clean_incoming(clean_info_filename="in.txt", default_order=500):
                 # clean_info["lat"]     = ["lat", -120]
                 # clean_info["long"]    = ["long", -120]
                 # clean_info["msc/observation/atmospheric/surface_weather/ca-1.0-ascii"]=["mscschema", -100]
+        clean_info_file_obj.close()
     except:
         clean = False
         if clean_info_filename != "OFF":
@@ -220,7 +220,7 @@ def parse_mbag_xml(link_base_url_root, strdate, title_dict={}, clean_dict={}, cl
             single_xml_copy = dict(single_xml_data)
             total_xml_data.append(single_xml_copy)
 
-        title_list_sorted = sorted(title_dict.iteritems(), key=itemgetter(1), reverse=False)
+        title_list_sorted = sorted(list(title_dict.items()), key=itemgetter(1), reverse=False)
 
     return total_xml_data, title_list_sorted
 
@@ -328,11 +328,11 @@ def grab_desired_xml_data(daily_or_hourly):
 def list_xml_links(xml_links_url):
     one_station_html = get_html_string(xml_links_url)
     one_station_xml_links = []
-    one_station_soup = BeautifulSoup.BeautifulSoup(one_station_html)
+    one_station_soup = BeautifulSoup(one_station_html, features="html5lib")
 
     for tag in one_station_soup.findAll('a', href=True):
         if ".xml" in tag['href']:
-            file_name = tag['href'].encode('ascii', 'ignore')
+            file_name = str(tag['href'].encode('ascii', 'ignore'), "utf-8")
             if file_name.split('_')[-1] == 'e.xml':
                 one_station_xml_links.append(file_name)
 
@@ -405,7 +405,7 @@ def parse_station(urlroot, strdate, station="default", title_dict={}, clean_dict
 
     one_station_html = get_html_string(one_station_url)
     one_station_xml_links = []
-    one_station_soup = BeautifulSoup.BeautifulSoup(one_station_html)
+    one_station_soup = BeautifulSoup(one_station_html, features="html5lib")
     
     for tag in one_station_soup.findAll('a', href=True):
         if ".xml" in tag['href']:
@@ -491,7 +491,7 @@ def csv_out(results_list, ordered_titles, filename):
         ordered_titles_list = finalize_titles(ordered_titles)
         
         # Write the header and data to the csv file
-        with open(get_path_dir('raw_output_data', filename), "wb") as f:
+        with open(get_path_dir('raw_output_data', filename), "w", newline='') as f:
             writer = csv.writer(f)
             writer.writerow(ordered_titles_list)
             writer.writerows(ordered_results_list)

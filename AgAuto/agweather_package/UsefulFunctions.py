@@ -41,7 +41,7 @@ def download_file(url, file_name, default_folder='input_data'):
     with requests.get(url, stream=True) as r:
         chunkSize = 1024  # Download 1024 bytes at a time.
         with open(get_path_dir(default_folder, file_name), 'wb') as raw_file:
-            for chunk in tqdm(iterable=r.iter_content(chunk_size=chunkSize), total=int(r.headers['Content-Length']) / chunkSize, unit='KB', desc="Downloading %s" %file_name):
+            for chunk in tqdm(iterable=r.iter_content(chunk_size=chunkSize), total=int(r.headers['Content-Length']) / chunkSize, unit='KB', desc="Downloading %s" % file_name):
                 raw_file.write(chunk)
 
 

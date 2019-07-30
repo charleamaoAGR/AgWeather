@@ -45,7 +45,8 @@ def user_in():
             contents_to_write = daily.back_fill_daily_ec()
             if len(contents_to_write) > 1:
                 write_list_to_csv('DailyEC.csv', contents_to_write)
-                """
+            """
+
             daily.update_dailyEC()
             file_24 = "mawp24raw.txt"
             file_60 = "mawp60raw.txt"

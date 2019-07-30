@@ -370,7 +370,7 @@ def getUpdatedDailyData(urlroot, strdate_dash, daily_contents, updated_daily_con
             count += 1
 
     # Overwrite DailyEC.csv with the newly updated data.
-    with open('DailyEC.csv', 'wb') as csv_file:
+    with open('DailyEC.csv', 'w', newline='') as csv_file:
         daily_ec = csv.writer(csv_file, delimiter=',')
         for each_row in updated_daily_contents:
             daily_ec.writerow(each_row)
