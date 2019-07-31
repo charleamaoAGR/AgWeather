@@ -17,6 +17,7 @@ from tqdm import tqdm
 from os import getcwd, path
 from .UsefulClasses import GroupedArray
 import csv
+import yaml
 
 
 urlroot = "http://dd.weather.gc.ca/observations/xml/MB/yesterday/"
@@ -137,7 +138,7 @@ def get_correct_data(station_id, summary_dict, str_date):
         elif station_id == "YWG":
             correct_data = summary_dict["XWG"]
         elif station_id == "YQD":
-            correct_data = summary_dict["PQD"]
+            correct_data = find_alternative_data("PQD", "YQD", summary_dict)
         elif station_id == "YDN":
             correct_data = summary_dict["WZT"]
         elif station_id == "YBR":
@@ -150,6 +151,32 @@ def get_correct_data(station_id, summary_dict, str_date):
     return correct_data
 
 
+def get_alternative_station(default_id):
+    alternative_id = default_id
+    with open(get_path_dir('config_files', 'stations_dailyec.yaml'), 'r') as stations:
+        yaml_load = yaml.safe_load(stations)
+        if default_id in list(yaml_load.keys()):
+            possible_alternative_id = yaml_load[default_id]['alternative_id']
+        if possible_alternative_id != 'NONE':
+            alternative_id = possible_alternative_id
+    return alternative_id
+
+
+def find_alternative_data(desired_station, alternative_station, summary_dict):
+    data_to_return = ["", "", ""]
+    try:
+        data_to_return = summary_dict[desired_station]
+        for each_value in data_to_return:
+            if each_value == "":
+                raise KeyError
+    except KeyError:
+        try:
+            data_to_return = summary_dict[alternative_station]
+        except KeyError:
+            pass
+    return data_to_return
+
+
 """
 Purpose: get_EC_stations returns a list of the desired Environment Canada stations defined in 'stations.txt', if you
 wish to add or remove stations, refer to this text file.
@@ -157,36 +184,26 @@ wish to add or remove stations, refer to this text file.
 
 
 def get_EC_stations():
-    stations_list = []
-    with open(get_path_dir('config_files', 'stations.txt'), 'r') as stations:
-        for each_line in stations:
-            stations_list.append(each_line)
+    stations_dict = {}
+    with open(get_path_dir('config_files', 'stations_dailyec.yaml'), 'r') as stations:
+        yaml_load = yaml.safe_load(stations)
+        for each_station in yaml_load:
+            stations_dict[each_station] = yaml_load[each_station]
 
-    return stations_list
+    return stations_dict
 
 
 def get_EC_station_ids(need_alternative=False):
+    yaml_contents = get_EC_stations()
     station_ids = []
-    with open(get_path_dir('config_files', 'stations.txt'), 'r') as stations:
-        for each_line in stations:
-            station_id = each_line.split(':')[0]
-            if need_alternative:
-                if station_id == "YPG":
-                    correct_id = "WPG"
-                elif station_id == "YGM":
-                    correct_id = "PGH"
-                elif station_id == "YWG":
-                    correct_id = "XWG"
-                elif station_id == "YQD":
-                    correct_id = "PQD"
-                elif station_id == "YDN":
-                    correct_id = "WZT"
-                elif station_id == "YBR":
-                    correct_id = "PBO"
-                else:
-                    correct_id = station_id
-                station_id = correct_id
-            station_ids.append(station_id)
+    for station_id in yaml_contents.keys():
+        alternative_id = yaml_contents[station_id]['alternative_id']
+        if need_alternative and alternative_id != "NONE":
+            correct_id = alternative_id
+        else:
+            correct_id = station_id
+        station_id = correct_id
+        station_ids.append(station_id)
 
     return station_ids
 
@@ -327,10 +344,10 @@ def getUpdatedDailyData(urlroot, strdate_dash, daily_contents, updated_daily_con
     # then add all new station data into updated_daily_contents. updated_daily_contents will only contain the
     # recent data.
     if len(daily_contents) == 0:
-        for each_station in stations:
-            station_desc = each_station.split(':')
-            new_row = ["C%s" % station_desc[0], station_desc[1].strip('\n'), strdate_dash]
-            new_row.extend(get_correct_data(station_desc[0], summary_dict, strdate_dash))
+        for each_station in stations.keys():
+            station_desc = stations[each_station]['desc']
+            new_row = ["C%s" % each_station, station_desc.strip('\n'), strdate_dash]
+            new_row.extend(get_correct_data(each_station, summary_dict, strdate_dash))
             updated_daily_contents.append(new_row)
 
     # If daily_contents has previous data from previous days then add the new weather station data in the proper
@@ -342,10 +359,11 @@ def getUpdatedDailyData(urlroot, strdate_dash, daily_contents, updated_daily_con
         size = len(daily_contents)
 
         # Loop through each line in daily_contents.
+        station_ids = list(stations.keys())
         for row in daily_contents:
 
             # Grab the station identifiers (i.e. Station ID, description) along with the new date.
-            new_row = ["C%s" % stations[stations_count].split(':')[0], row[1].strip('\n'), strdate_dash]
+            new_row = ["C%s" % station_ids[stations_count], row[1].strip('\n'), strdate_dash]
 
             # First adds previous weather station data back to the DailyEC.wq
             updated_daily_contents.append(row)
@@ -355,7 +373,7 @@ def getUpdatedDailyData(urlroot, strdate_dash, daily_contents, updated_daily_con
             if count < size - 1:
                 if daily_contents[count][0] != daily_contents[count + 1][0]:
                     # Extends new_row to include new weather station data for that ID.
-                    new_row.extend(get_correct_data(stations[stations_count].split(':')[0], summary_dict, strdate_dash))
+                    new_row.extend(get_correct_data(station_ids[stations_count], summary_dict, strdate_dash))
                     updated_daily_contents.append(new_row)
                     stations_count += 1
 
@@ -363,7 +381,7 @@ def getUpdatedDailyData(urlroot, strdate_dash, daily_contents, updated_daily_con
             else:
 
                 # Extends new_row to include new weather station data for that ID.
-                new_row.extend(get_correct_data(stations[stations_count].split(':')[0], summary_dict, strdate_dash))
+                new_row.extend(get_correct_data(station_ids[stations_count], summary_dict, strdate_dash))
                 updated_daily_contents.append(new_row)
                 stations_count += 1
 
@@ -459,6 +477,7 @@ def updated_daily_ec_data(dates):
         xml_object = get_xml_obj(generate_daily_xml_link(each_date.replace('-', '')))
         for each_station in dates.get_data(each_date):
             # Parse the xml file for the updated data.
+            each_station = get_alternative_station(each_station)
             temp_high = get_value(xml_object, each_station, 'air_temperature_yesterday_high')
             temp_low = get_value(xml_object, each_station, 'air_temperature_yesterday_low')
             precip = get_value(xml_object, each_station, 'total_precipitation')
