@@ -188,3 +188,10 @@ def write_list_to_csv(file_name, contents_list):
         daily_ec = csv.writer(csv_file, delimiter=',')
         for each_row in contents_list:
             daily_ec.writerow(each_row)
+
+
+def chunks(l, n):
+    # For item i in a range that is a length of l,
+    for i in range(0, len(l), n):
+        # Create an index range for l of n items:
+        yield l[i:i+n]

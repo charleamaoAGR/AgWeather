@@ -487,6 +487,24 @@ def updated_daily_ec_data(dates):
     return data_filling
 
 
+def create_xml_links(dates):
+    dates_to_download = dates.get_identifiers()  # Get a list of all the dates with incomplete data.
+    links = []
+    for each_date in dates_to_download:
+        links.append(generate_daily_xml_link(each_date.replace('-', '')))
+    return links
+
+
+def download_all_xml_objects(xml_links):
+    number_links = len(xml_links)
+    if number_links > 3:
+        chunk_size = len(xml_links) / 3
+    else:
+        chunk_size = 1
+    
+    pass
+
+
 # If given a date and station ID, and Grouped Array from updated_daily_ec_data it will return the updated values.
 # Will return None if it can't find the data within the Grouped Array.
 def get_updated_ec_data(date_to_update, station_id, date_grouped_array):

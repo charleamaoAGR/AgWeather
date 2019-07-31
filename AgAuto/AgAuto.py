@@ -17,6 +17,7 @@ from subprocess import call
 from os import getcwd, path
 from time import sleep
 from agweather_package import get_path_dir
+from agweather_package import chunks
 from agweather_package import write_list_to_csv
 import concurrent.futures
 import yaml
@@ -77,9 +78,7 @@ def user_in():
 
 
 def debug():
-    with open(get_path_dir('config_files', 'stations_dailyec.yaml'), 'r') as stations:
-        yaml_load = yaml.safe_load(stations)
-        pass
+    print(list(chunks(list(range(20)), 7)))
 
 
 def main():
