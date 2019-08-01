@@ -276,6 +276,12 @@ def get_value(xml_obj, station, field_name):
     return value
 
 
+def get_date_from_xml(xml_obj):
+    meta_data = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}metadata')
+    meta_contents = meta_data[-1].find(MD_IE_PATH).getchildren()
+    return extract_value(meta_contents, 'observation_date_local_time').split('T')[0]
+
+
 def update_weather_array(xml_obj, fields, grouped_array):
     metadata = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}metadata')
     result = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}result')
