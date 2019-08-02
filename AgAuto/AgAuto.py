@@ -15,11 +15,9 @@ from agweather_package import DailyUpload as daily
 from pyfiglet import Figlet
 from subprocess import call
 from os import getcwd, path
-from time import sleep
-from agweather_package import get_path_dir
+from time import sleep, time
 from agweather_package import write_list_to_csv
-import concurrent.futures
-import yaml
+
 
 """
 Purpose: user_in() serves as the user interface for AgAuto. The function
@@ -43,11 +41,13 @@ def user_in():
         choice = input("Which program do you want to run?:")
 
         if choice.strip() == 'dailyUpload' or choice.strip() == '1':
-            """
+            time1 = time()
+            print("Downloading data....")
             contents_to_write = daily.back_fill_daily_ec()
             if len(contents_to_write) > 1:
                 write_list_to_csv('DailyEC.csv', contents_to_write)
-                """
+                time2 = time()
+                print("Time Elapsed: %is" % (time2 - time1))
 
             daily.update_dailyEC()
             file_24 = "mawp24raw.txt"
@@ -77,9 +77,8 @@ def user_in():
 
 
 def debug():
-    with open(get_path_dir('config_files', 'stations_dailyec.yaml'), 'r') as stations:
-        yaml_load = yaml.safe_load(stations)
-        pass
+    dates = daily.get_empty_dates()
+    daily.updated_daily_ec_data(dates)
 
 
 def main():

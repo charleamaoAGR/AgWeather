@@ -132,7 +132,7 @@ class DailyData:
         matching_periods = 0
         temp_sum = 0.0
         for each_entry in self.data:
-            if each_entry[1] >= WISDOM_LOW_TEMP_CUTOFF and each_entry[2] >= RH_CUTOFF:#>= RH_CUTOFF:
+            if each_entry[1] >= WISDOM_LOW_TEMP_CUTOFF and each_entry[2] >= RH_CUTOFF:  # >= RH_CUTOFF:
                 matching_periods += 1
                 temp_sum += each_entry[1]
         # If/Else statements are necessary to avoid dividing by 0 if no matching periods are valid.

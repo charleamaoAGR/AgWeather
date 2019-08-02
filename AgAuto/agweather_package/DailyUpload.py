@@ -16,8 +16,13 @@ from datetime import date, timedelta, datetime
 from tqdm import tqdm
 from os import getcwd, path
 from .UsefulClasses import GroupedArray
+from .UsefulFunctions import chunks
+from .UsefulFunctions import increment_all_date_str
 import csv
 import yaml
+import concurrent.futures
+from datetime import datetime
+from time import time
 
 
 urlroot = "http://dd.weather.gc.ca/observations/xml/MB/yesterday/"
@@ -471,20 +476,52 @@ def get_empty_dates():
 # Looks at dates and stations with incomplete data and downloads the updated data from the EC Websites' XML files.
 def updated_daily_ec_data(dates):
     dates_to_download = dates.get_identifiers()  # Get a list of all the dates with incomplete data.
+    increment_all_date_str(dates_to_download, 1, '%Y-%m-%d')
     data_filling = GroupedArray()
-    for each_date in tqdm(iterable=dates_to_download, total=len(dates_to_download), desc="Backfilling data"):
-        # Download the xml file for that date.
-        xml_object = get_xml_obj(generate_daily_xml_link(each_date.replace('-', '')))
-        for each_station in dates.get_data(each_date):
+    xml_objs = download_all_xml_objects(create_xml_links(dates))
+    for each_xml_obj in tqdm(iterable=xml_objs, total=len(xml_objs), desc="Backfilling data"):
+        date_str = get_date_from_xml(each_xml_obj)
+        date_str_correct = (datetime.strptime(date_str, '%Y-%m-%d') - timedelta(days=1)).strftime('%Y-%m-%d')
+        for each_station in dates.get_data(date_str_correct):
             # Parse the xml file for the updated data.
-            each_station = get_alternative_station(each_station)
-            temp_high = get_value(xml_object, each_station, 'air_temperature_yesterday_high')
-            temp_low = get_value(xml_object, each_station, 'air_temperature_yesterday_low')
-            precip = get_value(xml_object, each_station, 'total_precipitation')
+            # each_station = get_alternative_station(each_station)
+            temp_high = get_value(each_xml_obj, each_station, 'air_temperature_yesterday_high')
+            temp_low = get_value(each_xml_obj, each_station, 'air_temperature_yesterday_low')
+            precip = get_value(each_xml_obj, each_station, 'total_precipitation')
             # Insert the updated data into data_filling.
-            data_filling.insert_data(each_date, ['C' + each_station, "", each_date, temp_high, temp_low, precip])
+            data_filling.insert_data(date_str_correct, ['C' + each_station, "", date_str_correct, temp_high, temp_low, precip])
 
     return data_filling
+
+
+def create_xml_links(dates):
+    dates_to_download = dates.get_identifiers()  # Get a list of all the dates with incomplete data.
+    links = []
+    for each_date in dates_to_download:
+        links.append(generate_daily_xml_link(each_date.replace('-', '')))
+    return links
+
+
+def download_xml_links(xml_links):
+    xml_objects = []
+    for each_link in xml_links:
+        xml_objects.append(get_xml_obj(each_link))
+    return xml_objects
+
+
+def download_all_xml_objects(xml_links):
+    xml_objs = []
+    number_links = len(xml_links)
+    if number_links > 3:
+        chunk_size = int(len(xml_links) / 3)
+    else:
+        chunk_size = 1
+    chunked_list = list(chunks(xml_links, chunk_size))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        results = executor.map(download_xml_links, chunked_list)
+    for each in results:
+        xml_objs.extend(each)
+    return xml_objs
 
 
 # If given a date and station ID, and Grouped Array from updated_daily_ec_data it will return the updated values.
