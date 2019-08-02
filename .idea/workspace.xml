@@ -2,14 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e1dd9bc4-bbc1-4e76-831b-fe63b46740b8" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/AgWeather.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/AgWeather.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgAuto/AgAuto.py" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/AgAuto.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgAuto/DailyEC.csv" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/DailyEC.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/AgAuto/agweather_package/DailyUpload.py" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/agweather_package/DailyUpload.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgAuto/raw_output_data/output.csv" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto/raw_output_data/output.csv" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -147,11 +141,6 @@
           <url>file://$PROJECT_DIR$/AgAuto/agweather_package/xml_parser.py</url>
           <line>245</line>
           <option name="timeStamp" value="8" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/AgAuto/agweather_package/DailyUpload.py</url>
-          <line>489</line>
-          <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

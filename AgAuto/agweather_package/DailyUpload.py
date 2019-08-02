@@ -20,6 +20,7 @@ from .UsefulFunctions import chunks
 import csv
 import yaml
 import concurrent.futures
+from datetime import datetime
 from time import time
 
 
@@ -478,6 +479,7 @@ def updated_daily_ec_data(dates):
     xml_objs = download_all_xml_objects(create_xml_links(dates))
     for each_xml_obj in tqdm(iterable=xml_objs, total=len(xml_objs), desc="Backfilling data"):
         date_str = get_date_from_xml(each_xml_obj)
+        date_str_correct = (datetime.strptime(date_str, '%Y-%m-%d') - timedelta(days=1)).strftime('%Y-%m-%d')
         for each_station in dates.get_data(date_str):
             # Parse the xml file for the updated data.
             each_station = get_alternative_station(each_station)
@@ -485,7 +487,7 @@ def updated_daily_ec_data(dates):
             temp_low = get_value(each_xml_obj, each_station, 'air_temperature_yesterday_low')
             precip = get_value(each_xml_obj, each_station, 'total_precipitation')
             # Insert the updated data into data_filling.
-            data_filling.insert_data(date_str, ['C' + each_station, "", date_str, temp_high, temp_low, precip])
+            data_filling.insert_data(date_str_correct, ['C' + each_station, "", date_str_correct, temp_high, temp_low, precip])
 
     return data_filling
 
