@@ -2,6 +2,7 @@ import os
 import csv
 import requests
 from tqdm import tqdm
+from datetime import  datetime, timedelta
 
 
 """
@@ -195,3 +196,9 @@ def chunks(l, n):
     for i in range(0, len(l), n):
         # Create an index range for l of n items:
         yield l[i:i+n]
+
+
+def increment_all_date_str(date_str_list, increment, string_format):
+    for each_index in range(len(date_str_list)):
+        date_obj = datetime.strptime(date_str_list[each_index], string_format) + timedelta(days=increment)
+        date_str_list[each_index] = date_obj.strftime(string_format)
