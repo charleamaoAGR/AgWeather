@@ -42,6 +42,7 @@ def user_in():
 
         if choice.strip() == 'dailyUpload' or choice.strip() == '1':
             time1 = time()
+            print("Downloading data....")
             contents_to_write = daily.back_fill_daily_ec()
             if len(contents_to_write) > 1:
                 write_list_to_csv('DailyEC.csv', contents_to_write)
