@@ -191,6 +191,8 @@ def write_list_to_csv(file_name, contents_list):
             daily_ec.writerow(each_row)
 
 
+# Splits a list into multiple lists of size n, where n <=l.
+# If n doesn't divide evenly into l, then the last chunk will be less than n.
 def chunks(l, n):
     # For item i in a range that is a length of l,
     for i in range(0, len(l), n):
@@ -198,7 +200,16 @@ def chunks(l, n):
         yield l[i:i+n]
 
 
+# Takes a list of dates in string format and adds a specified number of days to it and returns it as a string again.
 def increment_all_date_str(date_str_list, increment, string_format):
     for each_index in range(len(date_str_list)):
         date_obj = datetime.strptime(date_str_list[each_index], string_format) + timedelta(days=increment)
         date_str_list[each_index] = date_obj.strftime(string_format)
+
+
+def initialize_yaml_text(main_identifiers, data_fields):
+    result_text = ""
+    assert(len(main_identifiers) == len(data_fields[0]))
+
+    for each_identifier in main_identifiers:
+        pass

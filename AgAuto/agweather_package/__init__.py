@@ -10,3 +10,4 @@ from .UsefulClasses import*
 from .UsefulFunctions import*
 from .PotatoBlight import*
 from .DailyUpload import*
+from .FHBRisk import*

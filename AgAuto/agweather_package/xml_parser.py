@@ -276,26 +276,36 @@ def get_value(xml_obj, station, field_name):
     return value
 
 
+# Take's an xml object from the get_xml_obj function and returns the observation date in local time.
 def get_date_from_xml(xml_obj):
     meta_data = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}metadata')
     meta_contents = meta_data[-1].find(MD_IE_PATH).getchildren()
     return extract_value(meta_contents, 'observation_date_local_time').split('T')[0]
 
 
+# Takes an xml_obj and a list of fields to extract from the xml_object and stores the data.
+# In order to store the data, the function needs to be passed a grouped_array.
+# The function then updates the grouped_array with the new data.
 def update_weather_array(xml_obj, fields, grouped_array):
-    metadata = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}metadata')
-    result = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}result')
+    # every first-child node from http://dd.weather.gc.ca/observations/xml/MB/ contain metadata and result nodes.
+    # lines below extract these nodes for every first-child in xml_obj.
+    metadata_node_list = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}metadata')
+    result_node_list = get_parent_nodes(xml_obj, '{http://www.opengis.net/om/1.0}result')
     id_dictionary = station_id_dictionary('mbag_id')
-    if len(metadata) != len(result):
+
+    # since every first child has metadata and result nodes, the size of the two lists should be the same.
+    if len(metadata_node_list) != len(result_node_list):
         raise Exception('List of metadata and result are not the same size!')
     else:
-        list_size = len(metadata)
+        list_size = len(metadata_node_list)
+        # We loop through each metadata and result node and access the data fields we need.
         for each_index in range(list_size):
-            meta_contents = metadata[each_index].find(MD_IE_PATH).getchildren()
-            result_contents = result[each_index].find(R_ELEMENTS_PATH).getchildren()
+            meta_contents = metadata_node_list[each_index].find(MD_IE_PATH).getchildren()
+            result_contents = result_node_list[each_index].find(R_ELEMENTS_PATH).getchildren()
             tc_id = extract_value(meta_contents, 'transport_canada_id')
             mbag_id = None
             observation_date = extract_value(meta_contents, 'observation_date_local_time')
+            # If transport_canada_id is one of the stations we care about, then store the station data into the array.
             if tc_id in id_dictionary.keys():
                 if observation_date is not None:
                     observation_date = extract_value(
@@ -308,18 +318,19 @@ def update_weather_array(xml_obj, fields, grouped_array):
                 grouped_array.insert_data(tc_id, data_entry)
 
 
+# Grabs hourly or daily data for every station in stations.yaml and returns the data in the form of a grouped_array.
 def grab_desired_xml_data(daily_or_hourly):
 
     weather_grouped_array = GroupedArray()
     if daily_or_hourly == 'daily':
         xml_url = DAILY_URL
         fields = DAILY_FIELDS
-        period = 2
+        period = 2  # If we want data from the last 48 hours, so 2 days.
         desired_xml_file_names = list_xml_links(xml_url)[-(period + 1):-1]  # Yesterday and the day before yesterday.
     elif daily_or_hourly == 'hourly':
         xml_url = HOURLY_URL
         fields = HOURLY_FIELDS
-        period = 48
+        period = 48  # If we want data from the last 48 hours, meaning we download 48 different xml files from EC.
         desired_xml_file_names = list_xml_links(xml_url)[-period:]
     else:
         raise Exception('Expected \'daily\' or \'hourly\', got %s instead.' % daily_or_hourly)
@@ -331,6 +342,7 @@ def grab_desired_xml_data(daily_or_hourly):
     return weather_grouped_array
 
 
+# Returns a list of xml_links from the http://dd.weather.gc.ca/observations/xml/MB/ website.
 def list_xml_links(xml_links_url):
     one_station_html = get_html_string(xml_links_url)
     one_station_xml_links = []
@@ -345,6 +357,8 @@ def list_xml_links(xml_links_url):
     return one_station_xml_links
 
 
+# Extracts the value of a node field with the specified identifier.
+# element_list is the list of elements from an xml node.
 def extract_value(element_list, identifier, attrib_to_search='name', attrib_for_value='value'):
     value = None
     for each_element in element_list:
@@ -356,6 +370,7 @@ def extract_value(element_list, identifier, attrib_to_search='name', attrib_for_
             value = each_element.getchildren()[-1].attrib.get(attrib_for_value)
             break
         elif name == 'wind_direction' and identifier == 'wind_direction':
+            # Convert cardinal direction into degrees as measured from the north pole.
             value = cardinal_to_degrees(each_element.attrib.get(attrib_for_value))
             break
         elif name == identifier:
