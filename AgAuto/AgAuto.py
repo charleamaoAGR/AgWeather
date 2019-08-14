@@ -10,6 +10,7 @@ the different automation programs for AgWeather.
 Date modified: Tue May 21 2019
 """
 
+import csv
 from agweather_package import PotatoBlight as potato
 from agweather_package import DailyUpload as daily
 from pyfiglet import Figlet
@@ -17,6 +18,8 @@ from subprocess import call
 from os import getcwd, path
 from time import sleep, time
 from agweather_package import write_list_to_csv
+from agweather_package import initialize_yaml_text
+from agweather_package import get_path_dir
 
 
 """
@@ -77,8 +80,15 @@ def user_in():
 
 
 def debug():
-    dates = daily.get_empty_dates()
-    daily.updated_daily_ec_data(dates)
+    with open(get_path_dir('config_files', 'mbag_stations.csv'), 'r') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        ids = []
+        data = []
+        for each_row in list(csv_reader)[1:]:
+            ids.append(int(each_row[0]))
+            data.append(each_row[1])
+
+        initialize_yaml_text(ids, 'desc', data, 'mbag_stations.yaml')
 
 
 def main():

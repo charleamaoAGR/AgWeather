@@ -88,6 +88,103 @@ def update_dailyEC(default_file="DailyEC.csv"):
 
 
 """
+Purpose: The purpose of getUpdatedDailyData is to get and insert the new weather station data into the proper locations
+and write the updated contents onto the DailyEC.csv file.
+
+Parameters:
+    urlroot - The url containing previous days xml weather station data. Currently points to the EC data mart.
+    strdate_dash - This is one of the dates that comes from the getEarlyDates function. Only works with dates in the 
+    format "YYYY-MM-DD".
+    daily_contents - Similar to getEarlyDates' dailyList parameter. This contains the contents of DailyEC.csv in list
+    form.
+    updated_daily_contents - Is a list containing only the header. This list gets updated with the data set containing
+    new weather station data by the end of the function.
+    default_output - The name of the csv file containing the new weather station data from the data mart. Defaults to 
+    "output.csv".
+"""
+
+
+def getUpdatedDailyData(urlroot, strdate_dash, daily_contents, updated_daily_contents, default_output="output.csv"):
+    date_list = strdate_dash.split('-')
+
+    # Converts strdate_dash into a date variable.
+    pure_date = date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
+
+    # Since strdate_dash is decremented by 1, this increments pure_date by 1 day in order to get proper data.
+    # In data-mart yesterday's tab, xml files always contain data from the day before the date listed on the file name.
+    pure_date = pure_date + timedelta(days=1)
+
+    # Convert pure_date into string format without dashes for use in parse_station.
+    strdate = pure_date.strftime("%Y%m%d")
+    clean_dict, clean = clean_incoming("fields.txt")
+
+    # results_list and ordered_titles contain the data parsed from the xml files from the data mart.
+    results_list, ordered_titles = parse_station(urlroot, strdate, "default", clean_dict=clean_dict, clean=clean)
+    csv_out(results_list, ordered_titles, "output.csv")
+
+    # Get the list of desired stations from the stations_dailyec.yaml file.
+    stations = get_EC_stations()
+
+    # Grab the new station data from the newly created output.csv file.
+    summary_csv = open(get_path_dir('raw_output_data', default_output), 'r')
+    summary_dict = dict_summary(summary_csv)
+    summary_csv.close()
+
+    # If daily_contents has no data (i.e. there is no DailyEC.csv in the working directory)
+    # then add all new station data into updated_daily_contents. updated_daily_contents will only contain the
+    # recent data.
+    if len(daily_contents) == 0:
+        for each_station in stations.keys():
+            station_desc = stations[each_station]['desc']
+            new_row = ["C%s" % each_station, station_desc.strip('\n'), strdate_dash]
+            new_row.extend(get_correct_data(each_station, summary_dict, strdate_dash))
+            updated_daily_contents.append(new_row)
+
+    # If daily_contents has previous data from previous days then add the new weather station data in the proper
+    # locations. The proper location means that the data is inserted along with the rest of that weather station's
+    # data. All of the data should be sorted by date (i.e. latest is always last).
+    else:
+        count = 0
+        stations_count = 0
+        size = len(daily_contents)
+
+        # Loop through each line in daily_contents.
+        station_ids = list(stations.keys())
+        for row in daily_contents:
+
+            # Grab the station identifiers (i.e. Station ID, description) along with the new date.
+            new_row = ["C%s" % station_ids[stations_count], row[1].strip('\n'), strdate_dash]
+
+            # First adds previous weather station data back to the DailyEC.csv
+            updated_daily_contents.append(row)
+
+            # If count is still within the allowed index values, then check if consecutive ID's are the same.
+            # If the consecutive ID's are different, then insert the new_row here and move on to the next station.
+            if count < size - 1:
+                if daily_contents[count][0] != daily_contents[count + 1][0]:
+                    # Extends new_row to include new weather station data for that ID.
+                    new_row.extend(get_correct_data(station_ids[stations_count], summary_dict, strdate_dash))
+                    updated_daily_contents.append(new_row)
+                    stations_count += 1
+
+            # If count is equal to size - 1 then you are at the end of the csv file, insert the new data here.
+            else:
+
+                # Extends new_row to include new weather station data for that ID.
+                new_row.extend(get_correct_data(station_ids[stations_count], summary_dict, strdate_dash))
+                updated_daily_contents.append(new_row)
+                stations_count += 1
+
+            count += 1
+
+    # Overwrite DailyEC.csv with the newly updated data.
+    with open('DailyEC.csv', 'w', newline='') as csv_file:
+        daily_ec = csv.writer(csv_file, delimiter=',')
+        for each_row in updated_daily_contents:
+            daily_ec.writerow(each_row)
+
+
+"""
 Purpose: dict_summary will return a dictionary that summarizes the max temperature, min temperature, and total precipitation
 data from Environment Canada.
 
@@ -300,103 +397,6 @@ def getEarlyDates(dailyList, date_yesterday):
             last_date = date_latest
 
     return datesList
-
-
-"""
-Purpose: The purpose of getUpdatedDailyData is to get and insert the new weather station data into the proper locations
-and write the updated contents onto the DailyEC.csv file.
-
-Parameters:
-    urlroot - The url containing previous days xml weather station data. Currently points to the EC data mart.
-    strdate_dash - This is one of the dates that comes from the getEarlyDates function. Only works with dates in the 
-    format "YYYY-MM-DD".
-    daily_contents - Similar to getEarlyDates' dailyList parameter. This contains the contents of DailyEC.csv in list
-    form.
-    updated_daily_contents - Is a list containing only the header. This list gets updated with the data set containing
-    new weather station data by the end of the function.
-    default_output - The name of the csv file containing the new weather station data from the data mart. Defaults to 
-    "output.csv".
-"""
-
-
-def getUpdatedDailyData(urlroot, strdate_dash, daily_contents, updated_daily_contents, default_output="output.csv"):
-    date_list = strdate_dash.split('-')
-
-    # Converts strdate_dash into a date variable.
-    pure_date = date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
-
-    # Since strdate_dash is decremented by 1, this increments pure_date by 1 day in order to get proper data.
-    # In data-mart yesterday's tab, xml files always contain data from the day before the date listed on the file name.
-    pure_date = pure_date + timedelta(days=1)
-
-    # Convert pure_date into string format without dashes for use in parse_station.
-    strdate = pure_date.strftime("%Y%m%d")
-    clean_dict, clean = clean_incoming("fields.txt")
-
-    # results_list and ordered_titles contain the data parsed from the xml files from the data mart.
-    results_list, ordered_titles = parse_station(urlroot, strdate, "default", clean_dict=clean_dict, clean=clean)
-    csv_out(results_list, ordered_titles, "output.csv")
-
-    # Get the list of desired stations from the stations.txt file.
-    stations = get_EC_stations()
-
-    # Grab the new station data from the newly created output.csv file.
-    summary_csv = open(get_path_dir('raw_output_data', default_output), 'r')
-    summary_dict = dict_summary(summary_csv)
-    summary_csv.close()
-
-    # If daily_contents has no data (i.e. there is no DailyEC.csv in the working directory)
-    # then add all new station data into updated_daily_contents. updated_daily_contents will only contain the
-    # recent data.
-    if len(daily_contents) == 0:
-        for each_station in stations.keys():
-            station_desc = stations[each_station]['desc']
-            new_row = ["C%s" % each_station, station_desc.strip('\n'), strdate_dash]
-            new_row.extend(get_correct_data(each_station, summary_dict, strdate_dash))
-            updated_daily_contents.append(new_row)
-
-    # If daily_contents has previous data from previous days then add the new weather station data in the proper
-    # locations. The proper location means that the data is inserted along with the rest of that weather station's
-    # data. All of the data should be sorted by date (i.e. latest is always last).
-    else:
-        count = 0
-        stations_count = 0
-        size = len(daily_contents)
-
-        # Loop through each line in daily_contents.
-        station_ids = list(stations.keys())
-        for row in daily_contents:
-
-            # Grab the station identifiers (i.e. Station ID, description) along with the new date.
-            new_row = ["C%s" % station_ids[stations_count], row[1].strip('\n'), strdate_dash]
-
-            # First adds previous weather station data back to the DailyEC.wq
-            updated_daily_contents.append(row)
-
-            # If count is still within the allowed index values, then check if consecutive ID's are the same.
-            # If the consecutive ID's are different, then insert the new_row here and move on to the next station.
-            if count < size - 1:
-                if daily_contents[count][0] != daily_contents[count + 1][0]:
-                    # Extends new_row to include new weather station data for that ID.
-                    new_row.extend(get_correct_data(station_ids[stations_count], summary_dict, strdate_dash))
-                    updated_daily_contents.append(new_row)
-                    stations_count += 1
-
-            # If count is equal to size - 1 then you are at the end of the csv file, insert the new data here.
-            else:
-
-                # Extends new_row to include new weather station data for that ID.
-                new_row.extend(get_correct_data(station_ids[stations_count], summary_dict, strdate_dash))
-                updated_daily_contents.append(new_row)
-                stations_count += 1
-
-            count += 1
-
-    # Overwrite DailyEC.csv with the newly updated data.
-    with open('DailyEC.csv', 'w', newline='') as csv_file:
-        daily_ec = csv.writer(csv_file, delimiter=',')
-        for each_row in updated_daily_contents:
-            daily_ec.writerow(each_row)
 
 
 def check_station(station_id, stations):

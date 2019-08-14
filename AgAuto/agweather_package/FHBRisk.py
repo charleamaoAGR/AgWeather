@@ -25,5 +25,4 @@ def display_fhb_risk(fhb_index):
     pass
 
 
-def main():
-    pass
+

@@ -1,6 +1,7 @@
 import os
 import csv
 import requests
+import yaml
 from tqdm import tqdm
 from datetime import  datetime, timedelta
 
@@ -207,9 +208,13 @@ def increment_all_date_str(date_str_list, increment, string_format):
         date_str_list[each_index] = date_obj.strftime(string_format)
 
 
-def initialize_yaml_text(main_identifiers, data_fields):
-    result_text = ""
-    assert(len(main_identifiers) == len(data_fields[0]))
+def initialize_yaml_text(main_identifiers, datafield, data_filling, yaml_filename):
+    assert(len(main_identifiers) == len(data_filling))
+    yaml_dict = dict()
+    index = 0
 
-    for each_identifier in main_identifiers:
-        pass
+    with open(get_path_dir('config_files', yaml_filename), 'w') as yaml_output:
+        for each_identifier in main_identifiers:
+            yaml_dict[each_identifier] = {datafield: data_filling[index]}
+            index += 1
+        yaml.dump(yaml_dict, yaml_output, default_flow_style=False)
