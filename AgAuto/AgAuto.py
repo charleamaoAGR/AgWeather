@@ -20,7 +20,8 @@ from time import sleep, time
 from agweather_package import write_list_to_csv
 from agweather_package import initialize_yaml_text
 from agweather_package import get_path_dir
-
+from agweather_package import FHBRisk as FHB
+from datetime import datetime
 
 """
 Purpose: user_in() serves as the user interface for AgAuto. The function
@@ -80,6 +81,7 @@ def user_in():
 
 
 def debug():
+    """
     with open(get_path_dir('config_files', 'mbag_stations.csv'), 'r') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         ids = []
@@ -89,6 +91,9 @@ def debug():
             data.append(each_row[1])
 
         initialize_yaml_text(ids, 'desc', data, 'mbag_stations.yaml')
+    """
+    valid_dates = FHB.list_valid_dates(datetime.today())
+    pass
 
 
 def main():

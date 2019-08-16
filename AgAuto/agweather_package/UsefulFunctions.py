@@ -3,7 +3,7 @@ import csv
 import requests
 import yaml
 from tqdm import tqdm
-from datetime import  datetime, timedelta
+from datetime import datetime, timedelta
 
 
 """
