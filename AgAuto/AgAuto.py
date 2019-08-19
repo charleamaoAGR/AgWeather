@@ -92,7 +92,8 @@ def debug():
 
         initialize_yaml_text(ids, 'desc', data, 'mbag_stations.yaml')
     """
-    valid_dates = FHB.list_valid_dates(datetime.today())
+    with open('mawp60raw.txt', 'r') as mawp_60_file:
+        weather_data = FHB.extract_7_day_data(datetime.today(), mawp_60_file)
     pass
 
 
