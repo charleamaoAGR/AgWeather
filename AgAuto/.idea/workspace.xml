@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7f689995-8690-4344-8c72-6d861d45676e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgAuto.py" beforeDir="false" afterPath="$PROJECT_DIR$/AgAuto.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DailyEC.csv" beforeDir="false" afterPath="$PROJECT_DIR$/DailyEC.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/agweather_package/FHBRisk.py" beforeDir="false" afterPath="$PROJECT_DIR$/agweather_package/FHBRisk.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config_files/mbag_stations.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config_files/mbag_stations.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raw_output_data/output.csv" beforeDir="false" afterPath="$PROJECT_DIR$/raw_output_data/output.csv" afterDir="false" />
-    </list>
+    <list default="true" id="7f689995-8690-4344-8c72-6d861d45676e" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -242,12 +235,12 @@
   <component name="ToolWindowManager">
     <frame x="-1688" y="-84" width="1696" height="1066" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2671149" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2671149" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32872504" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.37406215" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.37406215" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39938557" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
