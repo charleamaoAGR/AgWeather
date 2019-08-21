@@ -10,7 +10,6 @@ the different automation programs for AgWeather.
 Date modified: Tue May 21 2019
 """
 
-import csv
 from agweather_package import PotatoBlight as potato
 from agweather_package import DailyUpload as daily
 from pyfiglet import Figlet
@@ -18,10 +17,8 @@ from subprocess import call
 from os import getcwd, path
 from time import sleep, time
 from agweather_package import write_list_to_csv
-from agweather_package import initialize_yaml_text
-from agweather_package import get_path_dir
 from agweather_package import FHBRisk as FHB
-from datetime import datetime
+from agweather_package import get_path_dir
 
 """
 Purpose: user_in() serves as the user interface for AgAuto. The function
@@ -36,8 +33,8 @@ def user_in():
     rendered_text = Figlet(font='slant')
     print(rendered_text.renderText('AgAuto'))
 
-    choices = ["dailyUpload", "mawpCleaner", "debug", "calcPotatoDSV", "q"]
-    print("[1] dailyUpload\n[2] mawpCleaner \n[3] calcPotatoDSV\n[d] debug\n[q] Quit")
+    choices = ["dailyUpload", "mawpCleaner", "debug", "calcPotatoDSV", 'FHBRisk', "q"]
+    print("[1] dailyUpload\n[2] mawpCleaner \n[3] calcPotatoDSV\n[4] FHBRisk\n[d] debug\n[q] Quit")
     choice = ''
 
     # Program will keep asking for which programs to run until user inputs 'q'.
@@ -73,6 +70,9 @@ def user_in():
             daily.cleanData(file_60)
         elif choice.strip() == 'calcPotatoDSV' or choice.strip() == '3':
             potato.show_all_stations_dsv()
+        elif choice.strip() == 'FHBRisk' or choice.strip() == '4':
+            fhb_results = FHB.show_all_fhb_risks()
+            write_list_to_csv(get_path_dir('output_files', 'FHB_Calculation_results.csv'), fhb_results)
         elif choice.strip() == 'debug' or choice.strip() == 'd':
             debug()
         elif choice not in choices:
@@ -92,9 +92,7 @@ def debug():
 
         initialize_yaml_text(ids, 'desc', data, 'mbag_stations.yaml')
     """
-    with open('mawp60raw.txt', 'r') as mawp_60_file:
-        weather_data = FHB.extract_7_day_data(datetime.today(), mawp_60_file)
-    pass
+    FHB.show_all_fhb_risks()
 
 
 def main():
